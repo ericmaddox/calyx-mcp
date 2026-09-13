@@ -172,11 +172,25 @@ Resets synaptic weights to neutral baseline and purges stored experiences.
 
 ## Installation
 
-### Prerequisites
-- Python 3.10 or higher
-- NumPy >= 1.24.0
+### Option 1: Standard Installation via pip or uv (Recommended)
 
-### Install via pip (Editable Mode)
+```bash
+# Using pip
+pip install calyx-mcp
+
+# Using uv
+uv pip install calyx-mcp
+```
+
+### Option 2: Run Without Installation via uvx
+
+You can run Calyx MCP instantly without installing it into a local environment using `uvx`:
+
+```bash
+uvx calyx-mcp
+```
+
+### Option 3: Development Mode (from source)
 
 ```bash
 git clone https://github.com/ericmaddox/calyx-mcp.git
@@ -188,19 +202,28 @@ pip install -e .
 
 ## Configuration
 
-Add Calyx to your MCP configuration file (e.g., `~/.gemini/config/mcp_config.json`, Claude Desktop config, or Cursor configuration):
+Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_config.json`, Claude Desktop, or Cursor):
+
+### Using uvx (Zero-Install, Recommended)
 
 ```json
 {
   "mcpServers": {
     "calyx": {
-      "command": "python",
-      "args": [
-        "-m",
-        "calyx_mcp.server",
-        "--transport",
-        "stdio"
-      ]
+      "command": "uvx",
+      "args": ["calyx-mcp"]
+    }
+  }
+}
+```
+
+### Using Installed Python / CLI Command
+
+```json
+{
+  "mcpServers": {
+    "calyx": {
+      "command": "calyx-mcp"
     }
   }
 }
