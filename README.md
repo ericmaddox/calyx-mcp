@@ -159,40 +159,47 @@ Calyx was benchmarked against real-world vulnerability and resource management p
 
 ## MCP Tools Reference
 
-Calyx registers the following tools conforming to the MCP JSON-RPC 2.0 specification:
+Calyx registers the following tools conforming to the MCP JSON-RPC 2.0 specification (2024-11-05):
 
 ### 1. `check_code_reflex`
-Evaluates a code snippet against synaptic valence weights and stored experiences.
+Evaluates a code snippet against synaptic valence weights and stored experiences in <0.5ms with 0 LLM prompt tokens.
+- **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**:
-  - `code_snippet` (string, required): Source code to evaluate.
-  - `language` (string, optional): Programming language (e.g. `python`, `javascript`).
-- **Returns**: `status` (`neutral`, `aversion`, `attraction`), `valence`, `similarity_with_past_bugs`, `warning`, `recommendation`.
+  - `code` (string, required): The proposed code snippet, function, or diff to evaluate.
+  - `context` (string, optional): Optional context or filename describing the task.
+- **Returns**: `status` (`avoid`, `safe`, `neutral`), `valence`, `confidence`, `similarity_with_past_bugs`, `warning`, `recommendation`.
 
 ### 2. `remember_code_outcome`
-Applies dopamine-driven synaptic updates based on test execution or runtime results.
+Applies one-shot dopamine reward (test passed) or punishment (test failed/bug) to Mushroom Body synaptic weights.
+- **Annotations**: `readOnlyHint: false`, `destructiveHint: true`, `idempotentHint: false`, `openWorldHint: false`
 - **Parameters**:
-  - `code_snippet` (string, required): Code associated with the outcome.
-  - `language` (string, required): Programming language.
-  - `outcome` (string, required): `success` or `failure`.
-  - `lesson` (string, required): Summary of the bug or successful pattern.
-  - `reward_score` (number, optional): Value between `-1.0` (punishment) and `+1.0` (reward). Default `-1.0` for failure, `+1.0` for success.
+  - `code` (string, required): The code snippet that was executed or tested.
+  - `outcome` (string, required): `"success"` (rewards synapses) or `"failure"` (punishes synapses).
+  - `error_message` (string, optional): Error trace or description if outcome was `"failure"`.
+  - `tags` (array of strings, optional): Categorical tags (e.g. `["auth", "database", "deadlock"]`).
+- **Returns**: `status`, `outcome`, `valence_type`, `pattern_valence`, `active_synapses_updated`, `total_memories_stored`.
 
 ### 3. `query_associative_memory`
-Performs approximate nearest-neighbor search across stored code experiences using Fly-LSH similarity.
+Searches stored code patterns using Fly-LSH sparse binary Hamming similarity.
+- **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**:
-  - `query_code` (string, required): Code snippet to match.
-  - `top_k` (integer, optional): Maximum results to return (default: `5`).
-  - `language` (string, optional): Language filter.
+  - `query_code` (string, required): Code snippet to search against associative memory.
+  - `top_k` (integer, optional): Number of nearest neighbors to return (default: `5`, clamped $[1, 50]$).
+- **Returns**: `query`, `matches_count`, `matches` (array of nearest records with similarity scores).
 
 ### 4. `inspect_memory_state`
-Returns operational metrics and synaptic weight distribution of the Mushroom Body.
+Returns operational metrics, weight distribution, and health statistics of the Mushroom Body.
+- **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**: None.
-- **Returns**: Active sparsity percentage, total Kenyon cells, weight distribution stats, and storage location.
+- **Returns**: `total_memories_stored`, `total_kenyon_cells`, `active_sparsity_pct`, `weights_avg`, `weights_min`, `weights_max`, `depressed_synapses_count`, `potentiated_synapses_count`, `storage_location`.
 
 ### 5. `reset_memory`
-Resets synaptic weights to neutral baseline and purges stored experiences.
+Resets synaptic weights to neutral baseline (1.0) and purges stored experiences with automatic backup creation.
+- **Annotations**: `readOnlyHint: false`, `destructiveHint: true`, `idempotentHint: false`, `openWorldHint: false`
 - **Parameters**:
-  - `confirm` (boolean, required): Confirmation flag (`true`).
+  - `confirm` (boolean, required): Must be set to `true` to confirm reset.
+  - `backup` (boolean, optional): Whether to create a backup file before resetting (default: `true`).
+- **Returns**: `status`, `backup_created`, `backup_path`.
 
 ---
 
@@ -259,29 +266,30 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ## Running Tests
 
-Execute the comprehensive 46-test multi-tiered test suite:
+Execute the complete 46-test multi-tiered test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Architecture
-- **Unit & Algorithmic Tests (`tests/unit/`)**:
-  - `test_contradiction_resolution.py`: Verifies Failure Override Rule (recent failures supersede legacy positive weights) and recency tie-breaking.
-  - `test_edge_cases_and_resilience.py`: Verifies empty/whitespace rejection, 150KB code blocks, polyglot resilience (Rust, TypeScript, Go, SQL, JSON), and unicode handling.
-  - `test_memory_lifecycle_and_bounds.py`: Verifies 500-record bounded FIFO ring buffer synchronization, corrupt file baseline recovery, and passive synaptic weight decay.
-  - `test_hasher.py`: Verifies Kenyon Cell Fly-LSH $D=2048, k=102$ top-k sparsity invariants and hashing determinism.
-  - `test_memory.py`: Verifies dopamine PAM/PPL1 updates and weight clamping bounds ($[0.0, 5.0]$).
-  - `test_reflex.py`: Verifies behavioral reflex state transitions (`avoid`, `safe`, `neutral`).
-- **End-to-End & Protocol Tests (`tests/e2e/`)**:
-  - `test_mcp_api_hardening.py`: Verifies input bounds clamping and JSON-RPC error contracts.
-  - `test_concurrency_stress.py`: Verifies thread safety and async lock correctness under 50 concurrent agent workers.
-  - `test_outcome_validation.py`: Verifies strict validation of `outcome` arguments across 15 valid/invalid input variations.
-  - `test_tool_annotations.py`: Verifies standard MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`).
-  - `test_mcp_stdio.py`: Verifies full MCP stdio initialize, tools/list, and tools/call lifecycle.
-- **Integration & Benchmarks**:
-  - `tests/integration/test_persistence.py`: Verifies persistent weight and registry reloading across process restarts.
-  - `tests/benchmarks/test_token_economics.py`: Verifies compact tool schema token budgets (<800 tokens), minimal reflex response footprints (<80 tokens), and mathematical multi-turn token ROI models.
+### Test Suite Results (46 / 46 Passing)
+
+| Test Suite | Scope & Invariants Tested | Test Count | Status |
+| :--- | :--- | :---: | :---: |
+| **`tests/unit/test_contradiction_resolution.py`** | Failure Override Rule (recent failure overrides positive history), recency tie-breaking, state transitions | 3 | **PASSED** |
+| **`tests/unit/test_edge_cases_and_resilience.py`** | Empty/whitespace rejection, 150KB code blocks, polyglot resilience (Rust, TypeScript, Go, SQL, JSON), unicode | 4 | **PASSED** |
+| **`tests/unit/test_memory_lifecycle_and_bounds.py`** | 500-record ring buffer bounds, corrupt file baseline recovery, passive synaptic weight decay | 3 | **PASSED** |
+| **`tests/unit/test_hasher.py`** | Fly-LSH $D=2048, k=102$ top-k sparsity, deterministic random projection, AST token extraction | 4 | **PASSED** |
+| **`tests/unit/test_memory.py`** | Dopaminergic PAM reward / PPL1 punishment updates, synaptic weight bounds $[0.0, 5.0]$ | 2 | **PASSED** |
+| **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 1 | **PASSED** |
+| **`tests/e2e/test_mcp_api_hardening.py`** | Input validation, parameter clamping, `-32601` method errors, resources read/list, ping | 6 | **PASSED** |
+| **`tests/e2e/test_concurrency_stress.py`** | Thread-safety & async lock correctness under 50 simultaneous agent workers | 1 | **PASSED** |
+| **`tests/e2e/test_outcome_validation.py`** | 15 parametrized valid and invalid input formats (rejects arbitrary strings, booleans, empty strings) | 15 | **PASSED** |
+| **`tests/e2e/test_tool_annotations.py`** | MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) | 2 | **PASSED** |
+| **`tests/e2e/test_mcp_stdio.py`** | End-to-end MCP JSON-RPC 2.0 stdio initialization, tool listing, and tool dispatch | 1 | **PASSED** |
+| **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across process restarts | 1 | **PASSED** |
+| **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), mathematical multi-turn ROI | 3 | **PASSED** |
+| **Total** | **Comprehensive Full Coverage** | **46** | **100% PASS** |
 
 ---
 
