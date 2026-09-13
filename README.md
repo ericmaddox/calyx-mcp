@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-9%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen.svg)](tests/)
 [![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
@@ -259,17 +259,29 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ## Running Tests
 
-Execute the comprehensive test suite:
+Execute the comprehensive 46-test multi-tiered test suite:
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py" -v
+python -m pytest tests/ -v
 ```
 
-### Test Coverage
-- `test_hasher.py`: Verifies deterministic hashing, projection dimensions, and Winner-Take-All sparsity.
-- `test_memory.py`: Verifies associative retrieval, dopamine-mediated plasticity, weight bounds, and file persistence.
-- `test_reflex.py`: Verifies rapid aversion on bug patterns and attraction on reinforced patterns.
-- `test_server.py`: Verifies JSON-RPC 2.0 tool registration, protocol initialization, and execution handlers.
+### Test Suite Architecture
+- **Unit & Algorithmic Tests (`tests/unit/`)**:
+  - `test_contradiction_resolution.py`: Verifies Failure Override Rule (recent failures supersede legacy positive weights) and recency tie-breaking.
+  - `test_edge_cases_and_resilience.py`: Verifies empty/whitespace rejection, 150KB code blocks, polyglot resilience (Rust, TypeScript, Go, SQL, JSON), and unicode handling.
+  - `test_memory_lifecycle_and_bounds.py`: Verifies 500-record bounded FIFO ring buffer synchronization, corrupt file baseline recovery, and passive synaptic weight decay.
+  - `test_hasher.py`: Verifies Kenyon Cell Fly-LSH $D=2048, k=102$ top-k sparsity invariants and hashing determinism.
+  - `test_memory.py`: Verifies dopamine PAM/PPL1 updates and weight clamping bounds ($[0.0, 5.0]$).
+  - `test_reflex.py`: Verifies behavioral reflex state transitions (`avoid`, `safe`, `neutral`).
+- **End-to-End & Protocol Tests (`tests/e2e/`)**:
+  - `test_mcp_api_hardening.py`: Verifies input bounds clamping and JSON-RPC error contracts.
+  - `test_concurrency_stress.py`: Verifies thread safety and async lock correctness under 50 concurrent agent workers.
+  - `test_outcome_validation.py`: Verifies strict validation of `outcome` arguments across 15 valid/invalid input variations.
+  - `test_tool_annotations.py`: Verifies standard MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`).
+  - `test_mcp_stdio.py`: Verifies full MCP stdio initialize, tools/list, and tools/call lifecycle.
+- **Integration & Benchmarks**:
+  - `tests/integration/test_persistence.py`: Verifies persistent weight and registry reloading across process restarts.
+  - `tests/benchmarks/test_token_economics.py`: Verifies compact tool schema token budgets (<800 tokens), minimal reflex response footprints (<80 tokens), and mathematical multi-turn token ROI models.
 
 ---
 
