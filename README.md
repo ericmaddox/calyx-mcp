@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/calyx_banner.jpg" alt="Calyx MCP - Bio-Inspired Code Reflex Engine" width="100%" />
+</p>
+
 # Calyx MCP
 
 [![PyPI Version](https://img.shields.io/pypi/v/calyx-mcp.svg)](https://pypi.org/project/calyx-mcp/)
