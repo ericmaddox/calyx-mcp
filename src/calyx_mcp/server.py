@@ -153,15 +153,13 @@ class CalyxMCPServer:
     async def run_stdio(self) -> None:
         """Run standard I/O JSON-RPC loop for Claude Desktop / Cursor / Antigravity"""
         self.logger.info("Calyx MCP Server running on stdio transport...")
-        reader = asyncio.StreamReader()
-        protocol = asyncio.StreamReaderProtocol(reader)
-        await asyncio.get_running_loop().connect_read_pipe(lambda: protocol, sys.stdin)
+        loop = asyncio.get_running_loop()
         
         while True:
-            line = await reader.readline()
+            line = await loop.run_in_executor(None, sys.stdin.readline)
             if not line:
                 break
-            line_str = line.decode('utf-8').strip()
+            line_str = line.strip()
             if not line_str:
                 continue
             try:
