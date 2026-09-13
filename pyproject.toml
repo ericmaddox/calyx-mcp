@@ -5,31 +5,40 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "calyx-mcp"
 version = "1.0.0"
-description = "Neuro-Symbolic Associative Code Memory MCP Server powered by the Fruit Fly Mushroom Body"
+description = "Bio-inspired associative memory & code reflex MCP server powered by the Drosophila Mushroom Body"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
-    {name = "Calyx Research Team", email = "research@calyx.ai"}
+    {name = "Eric Maddox", email = "eric.maddox@outlook.com"}
 ]
-keywords = ["mcp", "model-context-protocol", "fruit-fly", "mushroom-body", "neuromorphic", "ai-agents", "fly-lsh", "associative-memory"]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "fruit-fly",
+    "mushroom-body",
+    "fly-lsh",
+    "associative-memory",
+    "code-reflex",
+    "ai-agents"
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Code Generators"
 ]
 dependencies = [
     "numpy>=1.21.0",
-    "scipy>=1.7.0",
-    "pydantic>=1.9.0",
 ]
 
 [project.optional-dependencies]
@@ -37,12 +46,18 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.20.0",
     "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0"
+    "build>=1.0.0",
+    "twine>=5.0.0"
 ]
 
+[project.urls]
+Homepage = "https://github.com/ericmaddox/calyx-mcp"
+Repository = "https://github.com/ericmaddox/calyx-mcp"
+Issues = "https://github.com/ericmaddox/calyx-mcp/issues"
+Documentation = "https://github.com/ericmaddox/calyx-mcp#readme"
+
 [project.scripts]
+calyx-mcp = "calyx_mcp.server:main"
 calyx-server = "calyx_mcp.server:main"
 calyx-client = "calyx_mcp.client:main"
 
