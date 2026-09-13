@@ -38,8 +38,13 @@ Only pass the acceptance flags after independently checking equivalent outcomes.
 The comparator rejects missing usage, failed runs, failed MCP calls, missing
 expected reflex calls, and missing acceptance. It preserves negative savings.
 It prints aggregate metrics only, without copying prompts or code. Keep raw
-logs local until reviewed for private data. This adapter targets Codex JSONL
-events, not cumulative session-rollout counters.
+logs local until reviewed for private data. With one fresh session per file,
+the original command applies directly. **Resumed Codex runs report cumulative
+session counters:** use `--cumulative` when each input file combines snapshots
+from one resumed session. Summing those snapshots double-counts earlier turns.
+For incremental continuation costs, subtract the previous snapshot; see the
+[learned-reuse follow-up](reuse-results.md), which cross-checks those deltas
+against the session rollout counters.
 
 Use the same model, effort, starting task and acceptance criteria. Run OFF/ON
 and ON/OFF in separate fresh sessions and repeat on multiple tasks. Freeze each

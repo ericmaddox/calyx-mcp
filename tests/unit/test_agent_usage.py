@@ -58,3 +58,12 @@ def test_missing_cache_telemetry_remains_unknown():
     assert metrics.summarize([{"type": "turn.completed", "usage": {
         "input_tokens": 100, "output_tokens": 10,
     }}])["cached_input_tokens"] is None
+
+
+def test_resumed_session_counters_are_not_summed_in_cumulative_mode():
+    result = metrics.summarize([usage(100, 10), usage(220, 20, 100)], cumulative=True)
+    assert result["input_tokens"] == 220
+    assert result["output_tokens"] == 20
+    assert result["completed_turns"] == 2
+    with pytest.raises(ValueError):
+        metrics.summarize([usage(220, 20), usage(100, 10)], cumulative=True)

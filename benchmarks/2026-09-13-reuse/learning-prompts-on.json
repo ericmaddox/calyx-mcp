@@ -1,0 +1,18 @@
+[
+  {
+    "stage": 0,
+    "prompt": "This is a bounded synthetic trial. Do not inspect files, run shell commands, browse, delegate, or modify files. A deterministic test has already verified this failure: Verified failure: cache_key('ABC', 'X') returned 'ABC'; expected ('X', 'ABC'). The cache key must be the tuple (venue, symbol), with venue first. Code: def cache_key(symbol, venue): return symbol. Record this exact code once with remember_code_outcome, outcome failure, and an error_message capturing the verified expected tuple and ordering. Return a concise lesson preserving the required output type and ordering. Do not repair code yet."
+  },
+  {
+    "stage": 1,
+    "prompt": "This is a bounded synthetic trial. Do not inspect files, run shell commands, browse, delegate, or modify files. Repair this function to conform to the project's previously verified cache-key convention. Retrieve the previous lesson with query_associative_memory using this code before repairing it. Code: def cache_key(symbol, venue): return symbol. Return only the corrected function as the code field. Keep its name and two parameters, use one pure return expression, and no imports, calls, decorators, or annotations."
+  },
+  {
+    "stage": 2,
+    "prompt": "This is a bounded synthetic trial. Do not inspect files, run shell commands, browse, delegate, or modify files. Repair this function to conform to the project's previously verified cache-key convention. Retrieve the previous lesson with query_associative_memory using this code before repairing it. Code: def cache_key(ticker, market): return ticker. Return only the corrected function as the code field. Keep its name and two parameters, use one pure return expression, and no imports, calls, decorators, or annotations."
+  },
+  {
+    "stage": 3,
+    "prompt": "This is a bounded synthetic trial. Do not inspect files, run shell commands, browse, delegate, or modify files. Repair this function to conform to the project's previously verified cache-key convention. Retrieve the previous lesson with query_associative_memory using this code before repairing it. Code: def lookup_key(asset, exchange): return asset. Return only the corrected function as the code field. Keep its name and two parameters, use one pure return expression, and no imports, calls, decorators, or annotations."
+  }
+]
