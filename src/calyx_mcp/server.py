@@ -1,6 +1,5 @@
 """
-High-performance Asyncio JSON-RPC 2.0 MCP Server for Calyx
-Zero-configuration stdio and SSE transports for Claude Desktop, Cursor, Antigravity, and Hermes.
+Calyx MCP Server: Model Context Protocol standard implementation (2024-11-05)
 """
 
 import sys
@@ -52,21 +51,30 @@ class CalyxMCPServer:
             "serverInfo": self.server_info,
             "capabilities": {
                 "tools": {"listChanged": False},
-                "resources": {"subscribe": False, "listChanged": False}
+                "resources": {"subscribe": False, "listChanged": False},
+                "prompts": {"listChanged": False}
             }
         }
 
-    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Dispatch incoming MCP JSON-RPC 2.0 requests"""
         req_id = request.get("id")
         method = request.get("method") or request.get("type", "unknown")
         params = request.get("params", {})
+
+        # Ignore JSON-RPC notifications (no id)
+        if req_id is None and (method.startswith("notifications/") or method == "initialized"):
+            self.logger.debug(f"Received notification: {method}")
+            return None
 
         try:
             if method in ["initialize", "init"]:
                 res = await self.initialize()
                 return self._jsonrpc_success(req_id, res)
                 
+            elif method in ["notifications/initialized", "initialized"]:
+                return None
+
             elif method == "tools/list":
                 tools = calyx_tools_registry.get_all_tools()
                 return self._jsonrpc_success(req_id, {"tools": tools})
@@ -100,34 +108,41 @@ class CalyxMCPServer:
                         "text": json.dumps(metrics, indent=2)
                     }]
                 })
+
+            elif method == "prompts/list":
+                return self._jsonrpc_success(req_id, {"prompts": []})
                 
             elif method == "ping":
                 return self._jsonrpc_success(req_id, {})
                 
             else:
+                if req_id is None:
+                    return None
                 return self._jsonrpc_error(req_id, -32601, f"Method not found: {method}")
 
         except Exception as e:
             self.logger.error(f"Error processing {method}: {e}")
+            if req_id is None:
+                return None
             return self._jsonrpc_error(req_id, -32000, str(e))
 
     async def execute_tool(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """Execute specific Calyx tool"""
         if name == "check_code_reflex":
-            code = args.get("code", "")
-            context = args.get("context")
+            code = args.get("code") or args.get("code_snippet", "")
+            context = args.get("context") or args.get("language")
             outcome = await self.reflex_engine.evaluate_reflex(code, context)
             return outcome.__dict__
 
         elif name == "remember_code_outcome":
-            code = args.get("code", "")
+            code = args.get("code") or args.get("code_snippet", "")
             outcome_val = args.get("outcome", "failure")
-            error_msg = args.get("error_message")
+            error_msg = args.get("error_message") or args.get("lesson")
             tags = args.get("tags")
             return await self.memory.remember(code, outcome_val, error_msg, tags)
 
         elif name == "query_associative_memory":
-            query_code = args.get("query_code", "")
+            query_code = args.get("query_code") or args.get("code", "")
             top_k = int(args.get("top_k", 5))
             matches = await self.memory.query_similarity(query_code, top_k=top_k)
             return {"query": query_code[:100], "matches_count": len(matches), "matches": matches}
@@ -165,8 +180,9 @@ class CalyxMCPServer:
             try:
                 req = json.loads(line_str)
                 response = await self.handle_request(req)
-                sys.stdout.write(json.dumps(response) + "\n")
-                sys.stdout.flush()
+                if response is not None:
+                    sys.stdout.write(json.dumps(response) + "\n")
+                    sys.stdout.flush()
             except Exception as e:
                 self.logger.error(f"Error in stdio stream: {e}")
                 err_resp = {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": str(e)}}

@@ -3,7 +3,7 @@ Calyx MCP: Neuro-Symbolic Associative Code Memory MCP Server
 Powered by the Drosophila Mushroom Body & Fly-LSH sparse memory architecture.
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __author__ = "Calyx Research Team"
 
 from .config import CalyxConfig, get_default_config
