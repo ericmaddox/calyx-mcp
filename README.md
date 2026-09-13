@@ -4,8 +4,8 @@
 
 # Calyx MCP
 
-[![PyPI - Version](https://img.shields.io/pypi/v/calyx-mcp?logo=pypi&logoColor=white&color=blue&cacheSeconds=0)](https://pypi.org/project/calyx-mcp/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/calyx-mcp?color=orange&label=downloads)](https://pypi.org/project/calyx-mcp/)
+[![PyPI - Version](https://img.shields.io/pypi/v/calyx-mcp?logo=pypi&logoColor=white&color=blue)](https://pypi.org/project/calyx-mcp/)
+[![PyPI - Status](https://img.shields.io/pypi/status/calyx-mcp?color=blue)](https://pypi.org/project/calyx-mcp/)
 [![GitHub Release](https://img.shields.io/github/v/release/ericmaddox/calyx-mcp?color=blue&logo=github)](https://github.com/ericmaddox/calyx-mcp/releases)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
