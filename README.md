@@ -11,6 +11,16 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 
 ---
 
+## At a Glance
+
+* **The Problem**: AI coding agents repeatedly consume thousands of LLM prompt tokens and multi-second roundtrip latency diagnosing recurring bugs, antipatterns, and project constraints.
+* **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity to give agents instant, zero-token reflex memory.
+* **The Proof (Benchmark)**:
+  * **Latency**: **0.400 ms** (vs ~1,450 ms LLM API roundtrip — **>3,600x faster**)
+  * **Token Cost**: **0 tokens** (100% local associative memory)
+
+---
+
 ## Why "Calyx"?
 
 In insect neuroanatomy, the **Calyx** (plural: *calyces*) is the primary input neuropil of the **Mushroom Body** (*Corpora Pedunculata*)—the learning and memory center of the *Drosophila melanogaster* brain. Within the calyx, olfactory and sensory Projection Neurons (PNs) synapse directly onto the clawed dendritic arborizations of thousands of Kenyon Cells (KCs).
