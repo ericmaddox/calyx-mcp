@@ -129,21 +129,33 @@ class CalyxMCPServer:
     async def execute_tool(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """Execute specific Calyx tool"""
         if name == "check_code_reflex":
-            code = args.get("code") or args.get("code_snippet", "")
+            raw_code = args.get("code") or args.get("code_snippet")
+            if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
+                raise ValueError("Must provide non-empty 'code' string to evaluate reflex.")
             context = args.get("context") or args.get("language")
-            outcome = await self.reflex_engine.evaluate_reflex(code, context)
+            outcome = await self.reflex_engine.evaluate_reflex(raw_code, context)
             return outcome.__dict__
 
         elif name == "remember_code_outcome":
-            code = args.get("code") or args.get("code_snippet", "")
-            outcome_val = args.get("outcome", "failure")
+            raw_code = args.get("code") or args.get("code_snippet")
+            if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
+                raise ValueError("Must provide non-empty 'code' string.")
+            outcome_val = args.get("outcome")
+            if not isinstance(outcome_val, str) or outcome_val not in ("success", "failure"):
+                raise ValueError("outcome must be 'success' or 'failure'; it is required")
             error_msg = args.get("error_message") or args.get("lesson")
             tags = args.get("tags")
-            return await self.memory.remember(code, outcome_val, error_msg, tags)
+            return await self.memory.remember(raw_code, outcome_val, error_msg, tags)
 
         elif name == "query_associative_memory":
-            query_code = args.get("query_code") or args.get("code", "")
-            top_k = int(args.get("top_k", 5))
+            query_code = args.get("query_code") or args.get("code")
+            if not query_code or not isinstance(query_code, str) or not query_code.strip():
+                raise ValueError("Must provide non-empty 'query_code' string.")
+            try:
+                top_k = int(args.get("top_k", 5))
+            except (ValueError, TypeError):
+                raise ValueError("top_k must be a valid integer.")
+            top_k = max(1, min(top_k, 50))
             matches = await self.memory.query_similarity(query_code, top_k=top_k)
             return {"query": query_code[:100], "matches_count": len(matches), "matches": matches}
 

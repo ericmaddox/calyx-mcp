@@ -14,6 +14,10 @@ class CalyxToolRegistry:
             "check_code_reflex": {
                 "name": "check_code_reflex",
                 "description": "Instant (<1ms) associative memory check of proposed code against past rewarded or punished bug patterns. Returns 'avoid', 'safe', or 'neutral'.",
+                "annotations": {
+                    "readOnlyHint": True,
+                    "openWorldHint": False
+                },
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -32,6 +36,12 @@ class CalyxToolRegistry:
             "remember_code_outcome": {
                 "name": "remember_code_outcome",
                 "description": "Applies one-shot dopamine reward (test passed) or punishment (test failed/bug) to Mushroom Body synaptic weights.",
+                "annotations": {
+                    "readOnlyHint": False,
+                    "destructiveHint": True,
+                    "idempotentHint": False,
+                    "openWorldHint": False
+                },
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -60,6 +70,10 @@ class CalyxToolRegistry:
             "query_associative_memory": {
                 "name": "query_associative_memory",
                 "description": "Searches stored code patterns using Fly-LSH sparse binary Hamming similarity.",
+                "annotations": {
+                    "readOnlyHint": True,
+                    "openWorldHint": False
+                },
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -79,6 +93,10 @@ class CalyxToolRegistry:
             "inspect_memory_state": {
                 "name": "inspect_memory_state",
                 "description": "Returns total active memories, synaptic weight distribution, and health statistics of the Mushroom Body.",
+                "annotations": {
+                    "readOnlyHint": True,
+                    "openWorldHint": False
+                },
                 "inputSchema": {
                     "type": "object",
                     "properties": {}
@@ -87,6 +105,12 @@ class CalyxToolRegistry:
             "reset_memory": {
                 "name": "reset_memory",
                 "description": "Resets or prunes the synaptic weights and associative memory back to baseline.",
+                "annotations": {
+                    "readOnlyHint": False,
+                    "destructiveHint": True,
+                    "idempotentHint": False,
+                    "openWorldHint": False
+                },
                 "inputSchema": {
                     "type": "object",
                     "properties": {

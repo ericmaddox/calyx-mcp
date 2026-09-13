@@ -28,6 +28,7 @@ class PlasticityConfig:
     min_weight: float = 0.0
     max_weight: float = 5.0
     decay_rate: float = 0.9999
+    enable_weight_decay: bool = False
     reward_multiplier: float = 1.0
     punishment_multiplier: float = 1.5
 
@@ -39,13 +40,14 @@ class StorageConfig:
     weights_filename: str = "mushroom_body_weights.npz"
     metadata_filename: str = "memory_registry.json"
     auto_save_interval: int = 1  # save after every learning event
+    max_records: int = 500  # maximum episodic memory records to maintain in FIFO ring buffer
 
 
 @dataclass
 class ServerConfig:
     """MCP Server Settings"""
     server_name: str = "calyx-mcp"
-    version: str = "1.0.0"
+    version: str = "1.0.3"
     log_level: str = "INFO"
     transport: str = "stdio"
 

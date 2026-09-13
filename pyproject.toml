@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "calyx-mcp"
-version = "1.0.2"
+version = "1.0.3"
 description = "Bio-inspired associative memory & code reflex MCP server powered by the Drosophila Mushroom Body"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -69,5 +69,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 asyncio_mode = "auto"
 addopts = "-v --tb=short"

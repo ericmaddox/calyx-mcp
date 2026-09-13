@@ -35,6 +35,9 @@ class ReflexDecisionEngine:
         """
         Instant (<1ms) matrix evaluation of proposed code against Mushroom Body synaptic weights.
         """
+        if not isinstance(code, str) or not code.strip():
+            raise ValueError("code parameter must be a non-empty string.")
+
         rep = self.hasher.hash_code(code)
         active_weights = self.memory.weights[rep.active_indices]
         valence = float(np.mean(active_weights))
@@ -42,8 +45,8 @@ class ReflexDecisionEngine:
         # Baseline is 1.0 (pristine/neutral)
         confidence = float(abs(valence - 1.0) / 1.0)
 
-        # Check nearest previously punished bug records
-        matches = await self.memory.query_similarity(code, top_k=3)
+        # Check nearest previously stored memory records
+        matches = await self.memory.query_similarity(code, top_k=5)
         past_bug_match = 0.0
         bug_reason = None
         
@@ -54,10 +57,11 @@ class ReflexDecisionEngine:
                     bug_reason = m.get("error_message") or "Previously caused a unit test failure or runtime bug."
 
         # Decision Thresholds
-        if valence < 0.85 or past_bug_match >= 0.65:
+        # 1. Failure Override: Any matching failure record (>= 65%) or negative valence triggers avoid
+        if past_bug_match >= 0.65 or valence < 0.85:
             warning_msg = (
                 f"High resemblance ({int(past_bug_match*100)}%) to a previously punished bug pattern: '{bug_reason}'"
-                if bug_reason else
+                if past_bug_match >= 0.65 and bug_reason else
                 f"Negative synaptic valence ({valence:.2f} < 0.85). Pattern associated with past failures."
             )
             return ReflexOutcome(
@@ -66,6 +70,17 @@ class ReflexDecisionEngine:
                 confidence=round(max(confidence, past_bug_match), 4),
                 warning=warning_msg,
                 recommendation="Review code logic, check edge cases, or adopt an alternative implementation.",
+                similarity_with_past_bugs=round(past_bug_match, 4)
+            )
+            
+        # 2. Contradiction Guard: If valence > 1.15 but there is moderate bug resemblance (>= 50%), return neutral
+        elif valence > 1.15 and past_bug_match >= 0.50:
+            return ReflexOutcome(
+                status="neutral",
+                valence=round(valence, 4),
+                confidence=round(confidence, 4),
+                warning=f"Mixed history detected: positive baseline valence but moderate ({int(past_bug_match*100)}%) resemblance to a previous failure.",
+                recommendation="Pattern has conflicting history. Execute and verify tests carefully before deploying.",
                 similarity_with_past_bugs=round(past_bug_match, 4)
             )
             

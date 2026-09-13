@@ -6,6 +6,7 @@ Thread-safe, atomic disk persistence for learned code patterns.
 import os
 import json
 import asyncio
+import logging
 import numpy as np
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
@@ -13,6 +14,8 @@ from datetime import datetime
 
 from .config import PlasticityConfig, StorageConfig
 from .hasher import FlyLSHHasher, KenyonSparseRepresentation
+
+logger = logging.getLogger("calyx_mcp.memory")
 
 
 class MushroomBodyMemory:
@@ -31,6 +34,7 @@ class MushroomBodyMemory:
         
         # Associative Record Store (for semantic queries)
         self.records: List[Dict[str, Any]] = []
+        self._record_seq: int = 0
         self._lock = asyncio.Lock()
         
         # Ensure storage directory exists and load weights
@@ -50,12 +54,25 @@ class MushroomBodyMemory:
                     self.weights = data["weights"].astype(np.float32)
             if self.metadata_path.exists():
                 with open(self.metadata_path, "r", encoding="utf-8") as f:
-                    self.records = json.load(f)
+                    raw_records = json.load(f)
+                    if isinstance(raw_records, list):
+                        self.records = raw_records[-self.storage_cfg.max_records:]
+                        # Recover highest record sequence number
+                        seqs = []
+                        for r in self.records:
+                            rec_id = r.get("id", "")
+                            if rec_id.startswith("rec_"):
+                                try:
+                                    seqs.append(int(rec_id.split("_")[1]))
+                                except ValueError:
+                                    pass
+                        self._record_seq = max(seqs) if seqs else len(self.records)
             return True
-        except Exception:
-            # Fallback to pristine initialized state on corrupt file
+        except Exception as e:
+            logger.warning(f"Error loading Calyx memory state from disk: {e}; falling back to baseline.")
             self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
             self.records = []
+            self._record_seq = 0
             return False
 
     def save_to_disk(self) -> None:
@@ -72,11 +89,15 @@ class MushroomBodyMemory:
             # 2. Atomic metadata save (.tmp -> replace)
             tmp_meta = self.metadata_path.with_suffix(".tmp.json")
             with open(tmp_meta, "w", encoding="utf-8") as f:
-                json.dump(self.records[-500:], f, indent=2)  # Cap metadata store to latest 500 records
+                json.dump(self.records[-self.storage_cfg.max_records:], f, indent=2)
             if tmp_meta.exists():
                 tmp_meta.replace(self.metadata_path)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to persist Calyx memory to disk: {e}")
+
+    def apply_decay(self) -> None:
+        """Applies passive synaptic weight decay towards baseline (1.0)"""
+        self.weights = self.plasticity_cfg.baseline_weight + (self.weights - self.plasticity_cfg.baseline_weight) * self.plasticity_cfg.decay_rate
 
     async def remember(self, code: str, outcome: str, error_message: Optional[str] = None, 
                        tags: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -87,6 +108,10 @@ class MushroomBodyMemory:
             rep = self.hasher.hash_code(code)
             lr = self.plasticity_cfg.learning_rate
             
+            # Apply passive decay towards baseline if enabled
+            if self.plasticity_cfg.enable_weight_decay:
+                self.apply_decay()
+
             # Determine valence direction
             if outcome.lower() in ["success", "passed", "reward"]:
                 valence_delta = lr * self.plasticity_cfg.reward_multiplier
@@ -102,8 +127,9 @@ class MushroomBodyMemory:
             self.weights = np.clip(self.weights, self.plasticity_cfg.min_weight, self.plasticity_cfg.max_weight)
 
             # Record associative entry for future nearest-neighbor lookup
+            self._record_seq += 1
             record = {
-                "id": f"rec_{len(self.records)+1}",
+                "id": f"rec_{self._record_seq}",
                 "timestamp": datetime.now().isoformat(),
                 "outcome": outcome,
                 "valence_type": valence_type,
@@ -113,6 +139,10 @@ class MushroomBodyMemory:
                 "code_snippet": code[:200]
             }
             self.records.append(record)
+            
+            # Maintain bounded memory capacity
+            if len(self.records) > self.storage_cfg.max_records:
+                self.records = self.records[-self.storage_cfg.max_records:]
 
             self.save_to_disk()
 
@@ -138,7 +168,7 @@ class MushroomBodyMemory:
             query_set = set(query_rep.active_indices.tolist())
             
             scored_records = []
-            for rec in self.records:
+            for idx, rec in enumerate(self.records):
                 rec_set = set(rec["active_indices"])
                 intersection = len(query_set.intersection(rec_set))
                 union = len(query_set.union(rec_set))
@@ -149,12 +179,13 @@ class MushroomBodyMemory:
                     "outcome": rec["outcome"],
                     "error_message": rec["error_message"],
                     "tags": rec["tags"],
-                    "code_snippet": rec["code_snippet"]
+                    "code_snippet": rec["code_snippet"],
+                    "_rec_order": idx
                 })
 
-            # Sort descending by similarity
-            scored_records.sort(key=lambda x: x["similarity"], reverse=True)
-            return scored_records[:top_k]
+            # Sort descending by similarity first, then by recency (_rec_order) for tie-breaking
+            scored_records.sort(key=lambda x: (x["similarity"], x["_rec_order"]), reverse=True)
+            return [{k: v for k, v in r.items() if k != "_rec_order"} for r in scored_records[:top_k]]
 
     async def get_state_metrics(self) -> Dict[str, Any]:
         """Inspect synaptic weight distribution and health metrics"""
