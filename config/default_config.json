@@ -1,0 +1,25 @@
+{
+  "hasher": {
+    "dense_dim": 64,
+    "kenyon_cells": 2048,
+    "active_k": 102,
+    "seed": 42
+  },
+  "plasticity": {
+    "learning_rate": 0.15,
+    "baseline_weight": 1.0,
+    "min_weight": 0.0,
+    "max_weight": 5.0,
+    "decay_rate": 0.9999
+  },
+  "storage": {
+    "weights_filename": "mushroom_body_weights.npz",
+    "metadata_filename": "memory_registry.json"
+  },
+  "server": {
+    "server_name": "calyx-mcp",
+    "version": "1.0.0",
+    "log_level": "INFO",
+    "transport": "stdio"
+  }
+}

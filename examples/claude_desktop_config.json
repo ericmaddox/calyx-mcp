@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "calyx": {
+      "command": "calyx-server",
+      "args": ["--transport", "stdio"]
+    }
+  }
+}
