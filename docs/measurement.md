@@ -5,6 +5,10 @@ calling its tools are different measurements. Count tool schemas, arguments,
 results, context replay, retries and reasoning in the agent run. A similarity
 warning does not replace acceptance tests.
 
+Follow-ups cover [learning and conversation reuse](reuse-results.md),
+[Luna retrieval from 100 synthetic lessons](history-results.md), and
+[invalid or falsely reported learning outcomes](learning-validation.md).
+
 ## Reproduce the local experiment
 
 ```sh

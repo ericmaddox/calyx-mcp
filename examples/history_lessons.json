@@ -1,0 +1,584 @@
+[
+  {
+    "id": "distractor-001",
+    "code": "def mean(values): return sum(values)",
+    "lesson": "Mean divides the sum by the nonempty collection length.",
+    "target": false
+  },
+  {
+    "id": "distractor-002",
+    "code": "def spread(values): return max(values) + min(values)",
+    "lesson": "Range is maximum minus minimum.",
+    "target": false
+  },
+  {
+    "id": "distractor-003",
+    "code": "def midpoint(left, right): return left + right / 2",
+    "lesson": "Midpoint divides the sum of both endpoints by two.",
+    "target": false
+  },
+  {
+    "id": "distractor-004",
+    "code": "def fahrenheit(celsius): return celsius * 9 / 5",
+    "lesson": "Celsius conversion adds 32 after multiplying by nine fifths.",
+    "target": false
+  },
+  {
+    "id": "distractor-005",
+    "code": "def percent(part, whole): return part / whole",
+    "lesson": "The displayed percentage multiplies the fraction by 100.",
+    "target": false
+  },
+  {
+    "id": "distractor-006",
+    "code": "def square_area(side): return side + side",
+    "lesson": "Square area multiplies the side by itself.",
+    "target": false
+  },
+  {
+    "id": "distractor-007",
+    "code": "def rectangle_perimeter(width, height): return width + height",
+    "lesson": "Rectangle perimeter is twice the sum of width and height.",
+    "target": false
+  },
+  {
+    "id": "distractor-008",
+    "code": "def triangle_area(base, height): return base * height",
+    "lesson": "Triangle area divides the base-height product by two.",
+    "target": false
+  },
+  {
+    "id": "distractor-009",
+    "code": "def absolute(number): return -number",
+    "lesson": "Absolute value preserves nonnegative numbers and negates negative ones.",
+    "target": false
+  },
+  {
+    "id": "distractor-010",
+    "code": "def clamp_high(value, maximum): return max(value, maximum)",
+    "lesson": "An upper clamp returns the smaller of value and maximum.",
+    "target": false
+  },
+  {
+    "id": "distractor-011",
+    "code": "def clamp_low(value, minimum): return min(value, minimum)",
+    "lesson": "A lower clamp returns the larger of value and minimum.",
+    "target": false
+  },
+  {
+    "id": "distractor-012",
+    "code": "def is_even(number): return number % 2 == 1",
+    "lesson": "Even integers have remainder zero when divided by two.",
+    "target": false
+  },
+  {
+    "id": "distractor-013",
+    "code": "def is_odd(number): return number % 2 == 0",
+    "lesson": "Odd integers have nonzero remainder when divided by two.",
+    "target": false
+  },
+  {
+    "id": "distractor-014",
+    "code": "def divisible(number, divisor): return number / divisor == 0",
+    "lesson": "Divisibility checks remainder zero, for a nonzero divisor.",
+    "target": false
+  },
+  {
+    "id": "distractor-015",
+    "code": "def seconds(minutes): return minutes / 60",
+    "lesson": "Conversion from minutes to seconds multiplies by 60.",
+    "target": false
+  },
+  {
+    "id": "distractor-016",
+    "code": "def milliseconds(seconds): return seconds * 100",
+    "lesson": "Conversion from seconds to milliseconds multiplies by 1000.",
+    "target": false
+  },
+  {
+    "id": "distractor-017",
+    "code": "def kibibytes(byte_count): return byte_count / 1000",
+    "lesson": "Binary kibibytes divide byte count by 1024.",
+    "target": false
+  },
+  {
+    "id": "distractor-018",
+    "code": "def discount(price, rate): return price * rate",
+    "lesson": "Discounted price is price times one minus the fractional rate.",
+    "target": false
+  },
+  {
+    "id": "distractor-019",
+    "code": "def compound(principal, rate, years): return principal * (1 + rate * years)",
+    "lesson": "Compounding raises one plus rate to the number of years.",
+    "target": false
+  },
+  {
+    "id": "distractor-020",
+    "code": "def squared_distance(x, y): return x * x - y * y",
+    "lesson": "Squared Euclidean distance to the origin sums both squares.",
+    "target": false
+  },
+  {
+    "id": "distractor-021",
+    "code": "def factorial(number): return sum(range(1, number + 1))",
+    "lesson": "Factorial multiplies positive factors and returns one for zero.",
+    "target": false
+  },
+  {
+    "id": "distractor-022",
+    "code": "def product(values): return sum(values)",
+    "lesson": "Product multiplies elements, with identity one for an empty collection.",
+    "target": false
+  },
+  {
+    "id": "distractor-023",
+    "code": "def harmonic_term(number): return number",
+    "lesson": "Harmonic terms are the reciprocal of the positive index.",
+    "target": false
+  },
+  {
+    "id": "distractor-024",
+    "code": "def sign(number): return number > 0",
+    "lesson": "Sign returns minus one, zero, or one depending on the input.",
+    "target": false
+  },
+  {
+    "id": "distractor-025",
+    "code": "def whole_hours(seconds): return seconds // 60",
+    "lesson": "Whole hours divide a nonnegative second count by 3600.",
+    "target": false
+  },
+  {
+    "id": "distractor-026",
+    "code": "def first(items): return items[-1]",
+    "lesson": "First-element lookup uses index zero on a nonempty sequence.",
+    "target": false
+  },
+  {
+    "id": "distractor-027",
+    "code": "def last(items): return items[0]",
+    "lesson": "Last-element lookup uses index minus one on a nonempty sequence.",
+    "target": false
+  },
+  {
+    "id": "distractor-028",
+    "code": "def without_first(items): return items[:-1]",
+    "lesson": "Removing the first element slices from index one onward.",
+    "target": false
+  },
+  {
+    "id": "distractor-029",
+    "code": "def without_last(items): return items[1:]",
+    "lesson": "Removing the last element slices up to index minus one.",
+    "target": false
+  },
+  {
+    "id": "distractor-030",
+    "code": "def reverse(items): return items[::1]",
+    "lesson": "Reversing a sequence uses a negative step.",
+    "target": false
+  },
+  {
+    "id": "distractor-031",
+    "code": "def every_other(items): return items[1::2]",
+    "lesson": "This contract keeps positions zero, two, four and so on.",
+    "target": false
+  },
+  {
+    "id": "distractor-032",
+    "code": "def copy_list(items): return items",
+    "lesson": "An independent shallow list copy must not alias the original container.",
+    "target": false
+  },
+  {
+    "id": "distractor-033",
+    "code": "def flatten(groups): return [groups]",
+    "lesson": "Flattening one level emits each element of each child sequence in order.",
+    "target": false
+  },
+  {
+    "id": "distractor-034",
+    "code": "def unique_count(items): return len(items)",
+    "lesson": "Unique count measures the number of distinct hashable values.",
+    "target": false
+  },
+  {
+    "id": "distractor-035",
+    "code": "def common(left, right): return set(left).union(right)",
+    "lesson": "Common values are the intersection of the two sets.",
+    "target": false
+  },
+  {
+    "id": "distractor-036",
+    "code": "def combined(left, right): return set(left).intersection(right)",
+    "lesson": "Combined distinct values use the set union.",
+    "target": false
+  },
+  {
+    "id": "distractor-037",
+    "code": "def removed(left, right): return set(right).difference(left)",
+    "lesson": "Remaining left values use left minus right, preserving direction.",
+    "target": false
+  },
+  {
+    "id": "distractor-038",
+    "code": "def append_copy(items, value): return items + value",
+    "lesson": "List concatenation appends a singleton list containing the value.",
+    "target": false
+  },
+  {
+    "id": "distractor-039",
+    "code": "def repeat_items(items, count): return items + [count]",
+    "lesson": "Repeating a list multiplies the sequence by the repetition count.",
+    "target": false
+  },
+  {
+    "id": "distractor-040",
+    "code": "def sorted_copy(items): return items.sort()",
+    "lesson": "The in-place sort returns None; this API returns a new sorted list.",
+    "target": false
+  },
+  {
+    "id": "distractor-041",
+    "code": "def largest_two(items): return sorted(items)[:2]",
+    "lesson": "The largest two values are the final two elements of ascending order.",
+    "target": false
+  },
+  {
+    "id": "distractor-042",
+    "code": "def count_matches(items, wanted): return len(items)",
+    "lesson": "Count only elements equal to the requested value.",
+    "target": false
+  },
+  {
+    "id": "distractor-043",
+    "code": "def positions(items): return range(len(items) + 1)",
+    "lesson": "Valid zero-based positions stop before the collection length.",
+    "target": false
+  },
+  {
+    "id": "distractor-044",
+    "code": "def pairs(left, right): return [(left, right)]",
+    "lesson": "Pairwise combination zips corresponding elements up to the shorter length.",
+    "target": false
+  },
+  {
+    "id": "distractor-045",
+    "code": "def rotate_left(items): return items[-1:] + items[:-1]",
+    "lesson": "A one-position left rotation moves the first element to the end.",
+    "target": false
+  },
+  {
+    "id": "distractor-046",
+    "code": "def rotate_right(items): return items[1:] + items[:1]",
+    "lesson": "A one-position right rotation moves the final element to the front.",
+    "target": false
+  },
+  {
+    "id": "distractor-047",
+    "code": "def has_duplicates(items): return len(set(items)) == len(items)",
+    "lesson": "Duplicates exist when distinct count is smaller than total count.",
+    "target": false
+  },
+  {
+    "id": "distractor-048",
+    "code": "def all_positive(items): return any(x > 0 for x in items)",
+    "lesson": "All-positive requires every element to exceed zero.",
+    "target": false
+  },
+  {
+    "id": "distractor-049",
+    "code": "def any_negative(items): return all(x < 0 for x in items)",
+    "lesson": "Any-negative requires at least one element below zero.",
+    "target": false
+  },
+  {
+    "id": "distractor-050",
+    "code": "def nonempty(items): return len(items) >= 0",
+    "lesson": "A nonempty collection has strictly positive length.",
+    "target": false
+  },
+  {
+    "id": "distractor-051",
+    "code": "def trim(text): return text.lstrip()",
+    "lesson": "Trimming this field removes surrounding whitespace from both ends.",
+    "target": false
+  },
+  {
+    "id": "distractor-052",
+    "code": "def lower(text): return text.upper()",
+    "lesson": "Lowercase normalization must lowercase rather than uppercase letters.",
+    "target": false
+  },
+  {
+    "id": "distractor-053",
+    "code": "def upper(text): return text.lower()",
+    "lesson": "Uppercase display must uppercase rather than lowercase letters.",
+    "target": false
+  },
+  {
+    "id": "distractor-054",
+    "code": "def starts(text, prefix): return prefix in text",
+    "lesson": "Prefix matching is anchored at the beginning of the string.",
+    "target": false
+  },
+  {
+    "id": "distractor-055",
+    "code": "def ends(text, suffix): return suffix in text",
+    "lesson": "Suffix matching is anchored at the end of the string.",
+    "target": false
+  },
+  {
+    "id": "distractor-056",
+    "code": "def join_words(words): return ''.join(words)",
+    "lesson": "Joining words inserts one space between adjacent words.",
+    "target": false
+  },
+  {
+    "id": "distractor-057",
+    "code": "def word_count(text): return len(text)",
+    "lesson": "Word count splits on whitespace and counts resulting words.",
+    "target": false
+  },
+  {
+    "id": "distractor-058",
+    "code": "def prefix(text, length): return text[-length:]",
+    "lesson": "Taking a prefix retains the first requested number of characters.",
+    "target": false
+  },
+  {
+    "id": "distractor-059",
+    "code": "def drop_prefix(text, prefix): return text.replace(prefix, '')",
+    "lesson": "Remove one leading prefix only, leaving internal occurrences unchanged.",
+    "target": false
+  },
+  {
+    "id": "distractor-060",
+    "code": "def line_count(text): return len(text.split())",
+    "lesson": "Line counting uses line boundaries rather than whitespace-separated words.",
+    "target": false
+  },
+  {
+    "id": "distractor-061",
+    "code": "def replace_once(text, old, new): return text.replace(old, new)",
+    "lesson": "This replacement changes only the first matching occurrence.",
+    "target": false
+  },
+  {
+    "id": "distractor-062",
+    "code": "def case_equal(left, right): return left == right",
+    "lesson": "Caseless comparison case-folds both strings before comparing.",
+    "target": false
+  },
+  {
+    "id": "distractor-063",
+    "code": "def palindrome(text): return text == text",
+    "lesson": "Exact palindrome testing compares text with its reversal.",
+    "target": false
+  },
+  {
+    "id": "distractor-064",
+    "code": "def initial(text): return text[1]",
+    "lesson": "The initial character is at index zero for nonempty text.",
+    "target": false
+  },
+  {
+    "id": "distractor-065",
+    "code": "def ascii_digits(text): return text.isalnum()",
+    "lesson": "ASCII digit validation rejects letters and non-ASCII numerals.",
+    "target": false
+  },
+  {
+    "id": "distractor-066",
+    "code": "def contains_space(text): return text == ' '",
+    "lesson": "Space detection checks whether a space occurs anywhere in the text.",
+    "target": false
+  },
+  {
+    "id": "distractor-067",
+    "code": "def remove_spaces(text): return text.strip()",
+    "lesson": "This contract removes all ASCII spaces, including internal ones.",
+    "target": false
+  },
+  {
+    "id": "distractor-068",
+    "code": "def format_pair(left, right): return str(left) + str(right)",
+    "lesson": "Pair formatting separates the two fields with a colon.",
+    "target": false
+  },
+  {
+    "id": "distractor-069",
+    "code": "def padded_number(number, width): return str(number).ljust(width, '0')",
+    "lesson": "Numeric zero-padding adds zeros on the left.",
+    "target": false
+  },
+  {
+    "id": "distractor-070",
+    "code": "def encode_utf8(text): return text",
+    "lesson": "UTF-8 encoding returns bytes produced from the text.",
+    "target": false
+  },
+  {
+    "id": "distractor-071",
+    "code": "def decode_utf8(data): return str(data)",
+    "lesson": "UTF-8 decoding interprets bytes, rather than displaying their representation.",
+    "target": false
+  },
+  {
+    "id": "distractor-072",
+    "code": "def mapping_keys(mapping): return list(mapping.values())",
+    "lesson": "Key enumeration returns the mapping keys.",
+    "target": false
+  },
+  {
+    "id": "distractor-073",
+    "code": "def mapping_values(mapping): return list(mapping.keys())",
+    "lesson": "Value enumeration returns the mapping values.",
+    "target": false
+  },
+  {
+    "id": "distractor-074",
+    "code": "def has_key(mapping, key): return key in mapping.values()",
+    "lesson": "Key membership checks keys rather than values.",
+    "target": false
+  },
+  {
+    "id": "distractor-075",
+    "code": "def get_optional(mapping, key): return mapping[key]",
+    "lesson": "An absent optional key returns None rather than raising KeyError.",
+    "target": false
+  },
+  {
+    "id": "distractor-076",
+    "code": "def invert(mapping): return dict(mapping)",
+    "lesson": "Inversion swaps unique hashable values with their original keys.",
+    "target": false
+  },
+  {
+    "id": "distractor-077",
+    "code": "def merge(left, right): return {**right, **left}",
+    "lesson": "The right-hand mapping wins when duplicate keys are merged.",
+    "target": false
+  },
+  {
+    "id": "distractor-078",
+    "code": "def copy_mapping(mapping): return mapping",
+    "lesson": "A shallow mapping copy returns an independent dictionary.",
+    "target": false
+  },
+  {
+    "id": "distractor-079",
+    "code": "def truthy(value): return value is True",
+    "lesson": "General truth testing converts the value to bool.",
+    "target": false
+  },
+  {
+    "id": "distractor-080",
+    "code": "def missing(value): return not value",
+    "lesson": "Missing means None specifically; zero and empty strings are valid present values.",
+    "target": false
+  },
+  {
+    "id": "distractor-081",
+    "code": "def both(left, right): return left or right",
+    "lesson": "The both condition requires both boolean operands to hold.",
+    "target": false
+  },
+  {
+    "id": "distractor-082",
+    "code": "def either(left, right): return left and right",
+    "lesson": "The either condition accepts either boolean operand.",
+    "target": false
+  },
+  {
+    "id": "distractor-083",
+    "code": "def negate(value): return value",
+    "lesson": "Boolean negation returns the opposite truth value.",
+    "target": false
+  },
+  {
+    "id": "distractor-084",
+    "code": "def within(value, lower, upper): return value < lower and value > upper",
+    "lesson": "Inclusive interval membership requires lower <= value <= upper.",
+    "target": false
+  },
+  {
+    "id": "distractor-085",
+    "code": "def outside(value, lower, upper): return lower <= value <= upper",
+    "lesson": "Outside an inclusive interval means below lower or above upper.",
+    "target": false
+  },
+  {
+    "id": "distractor-086",
+    "code": "def overlaps(a, b, c, d): return b < c or d < a",
+    "lesson": "Closed intervals overlap unless one finishes before the other starts.",
+    "target": false
+  },
+  {
+    "id": "distractor-087",
+    "code": "def expired(now, deadline): return now < deadline",
+    "lesson": "A deadline expires when now is greater than or equal to it.",
+    "target": false
+  },
+  {
+    "id": "distractor-088",
+    "code": "def has_capacity(size, limit): return size <= limit",
+    "lesson": "One more item fits only while current size is strictly below the limit.",
+    "target": false
+  },
+  {
+    "id": "distractor-089",
+    "code": "def retry_allowed(attempt, maximum): return attempt > maximum",
+    "lesson": "Retry is allowed only while attempts used remain below the maximum.",
+    "target": false
+  },
+  {
+    "id": "distractor-090",
+    "code": "def nonnegative(number): return number > 0",
+    "lesson": "Nonnegative validation accepts zero as well as positive values.",
+    "target": false
+  },
+  {
+    "id": "distractor-091",
+    "code": "def leap_year(year): return year % 4 == 0",
+    "lesson": "Gregorian century years must also be divisible by 400 to be leap years.",
+    "target": false
+  },
+  {
+    "id": "distractor-092",
+    "code": "def monday_index(weekday): return weekday + 1",
+    "lesson": "This API uses the supplied zero-based Monday index without an offset.",
+    "target": false
+  },
+  {
+    "id": "distractor-093",
+    "code": "def midnight_minutes(hour, minute): return hour + minute",
+    "lesson": "Minutes since midnight multiply the hour by 60 before adding minutes.",
+    "target": false
+  },
+  {
+    "id": "distractor-094",
+    "code": "def time_remaining(now, deadline): return now - deadline",
+    "lesson": "Remaining duration subtracts now from the deadline.",
+    "target": false
+  },
+  {
+    "id": "distractor-095",
+    "code": "def basename(path): return path.split('/')[0]",
+    "lesson": "For normalized slash-separated paths, basename is the final component.",
+    "target": false
+  },
+  {
+    "id": "distractor-096",
+    "code": "def extension(filename): return filename.split('.')[0]",
+    "lesson": "For a filename with one extension, the extension follows the final dot.",
+    "target": false
+  },
+  {
+    "id": "distractor-097",
+    "code": "def portable_url(host, resource): return host + resource",
+    "lesson": "URL joining inserts a slash when neither adjoining side contains one.",
+    "target": false
+  }
+]

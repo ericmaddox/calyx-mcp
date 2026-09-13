@@ -136,7 +136,9 @@ class CalyxMCPServer:
 
         elif name == "remember_code_outcome":
             code = args.get("code") or args.get("code_snippet", "")
-            outcome_val = args.get("outcome", "failure")
+            outcome_val = args.get("outcome")
+            if not isinstance(outcome_val, str) or outcome_val not in ("success", "failure"):
+                raise ValueError("outcome must be 'success' or 'failure'; it is required")
             error_msg = args.get("error_message") or args.get("lesson")
             tags = args.get("tags")
             return await self.memory.remember(code, outcome_val, error_msg, tags)

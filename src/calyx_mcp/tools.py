@@ -32,7 +32,7 @@ class CalyxToolRegistry:
             },
             "remember_code_outcome": {
                 "name": "remember_code_outcome",
-                "description": "Applies one-shot dopamine reward (test passed) or punishment (test failed/bug) to Mushroom Body synaptic weights.",
+                "description": "Records a caller-reported test outcome and rewards or punishes synaptic weights. Calyx does not execute code or independently verify the reported outcome.",
                 "annotations": {
                     "readOnlyHint": False, "destructiveHint": True,
                     "idempotentHint": False, "openWorldHint": False

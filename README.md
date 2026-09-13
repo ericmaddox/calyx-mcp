@@ -23,6 +23,7 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 * **Measurement boundaries**:
   * **Local computation**: No LLM inference call is made by Calyx itself.
   * **Agent token savings**: Workload-dependent. Tool schemas, calls, results and subsequent reasoning still contribute to agent usage. See the [measurement guide and pilot results](docs/measurement.md).
+  * **Learning trust**: Outcomes are caller-reported. Calyx does not run the submitted code or verify a `success` claim; see the [wrong-outcome stress test](docs/learning-validation.md).
 
 ---
 
