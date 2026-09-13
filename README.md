@@ -141,6 +141,16 @@ Calyx Mushroom Body Reflex:
 
 ---
 
+### Real-World Bug & Vulnerability Verification
+
+Calyx was benchmarked against real-world vulnerability and resource management patterns to test generalization across altered variable names, structural shifts, and function signatures:
+
+| Scenario | Anti-Pattern Trained | Novel Variant Evaluated | Reflex Outcome | Latency | Tokens |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| **SQL Injection (CWE-89)** | `f"SELECT ... WHERE user = '{name}'"` | Concatenation in `authenticate_admin()` | **AVOID** (Valence: 0.775) | 0.630 ms | **0 tokens** |
+| **Resource Descriptor Leak** | `open()` in loop without context manager | `socket.create_connection()` unclosed | **AVOID** (Valence: 0.550) | 0.662 ms | **0 tokens** |
+| **CPU Spinlock Lockup** | `while True: poll()` without delay | Unbounded message loop polling | **AVOID** (Valence: 0.775) | 0.400 ms | **0 tokens** |
+
 ## MCP Tools Reference
 
 Calyx registers the following tools conforming to the MCP JSON-RPC 2.0 specification:
