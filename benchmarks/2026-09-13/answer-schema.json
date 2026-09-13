@@ -1,0 +1,1 @@
+{"type": "object", "properties": {"results": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "bug": {"type": "boolean"}, "reason": {"type": "string"}}, "required": ["id", "bug", "reason"], "additionalProperties": false}}}, "required": ["results"], "additionalProperties": false}

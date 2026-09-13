@@ -1,0 +1,223 @@
+{
+  "source_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+  "records": [
+    {
+      "run_id": "pair-1-off",
+      "pair_id": 1,
+      "calyx_enabled": false,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 13.672,
+      "acceptance_passed": false,
+      "telemetry": {
+        "input_tokens": 17182,
+        "output_tokens": 216,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 99,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": "Calibration input domain allowed integer overflow; evaluator label was incorrect"
+    },
+    {
+      "run_id": "pair-2-off",
+      "pair_id": 2,
+      "calyx_enabled": false,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 8.922,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 17332,
+        "output_tokens": 110,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": "Calyx calls blocked by approval policy in ON arm; exclude the pair"
+    },
+    {
+      "run_id": "pair-2-on",
+      "pair_id": 2,
+      "calyx_enabled": true,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 27.406,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 52799,
+        "output_tokens": 457,
+        "cached_input_tokens": 34560,
+        "reasoning_output_tokens": 120,
+        "completed_turns": 1,
+        "mcp_calls": 4,
+        "reflex_calls": 4,
+        "failed_mcp_calls": 4,
+        "valid_usage": false
+      },
+      "exclusion_reason": "Calyx calls blocked by approval policy in ON arm; exclude the pair"
+    },
+    {
+      "run_id": "pair-3-off",
+      "pair_id": 3,
+      "calyx_enabled": false,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 8.313,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 17189,
+        "output_tokens": 109,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": null
+    },
+    {
+      "run_id": "pair-3-on",
+      "pair_id": 3,
+      "calyx_enabled": true,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 22.922,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 53718,
+        "output_tokens": 339,
+        "cached_input_tokens": 34944,
+        "reasoning_output_tokens": 13,
+        "completed_turns": 1,
+        "mcp_calls": 4,
+        "reflex_calls": 4,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": null
+    },
+    {
+      "run_id": "pair-4-off",
+      "pair_id": 4,
+      "calyx_enabled": false,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 8.781,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 17332,
+        "output_tokens": 117,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": null
+    },
+    {
+      "run_id": "pair-4-on",
+      "pair_id": 4,
+      "calyx_enabled": true,
+      "calyx_commit": "61480b12f3531e931f5beb93422243be158ebfc6",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "medium",
+      "elapsed_seconds": 21.984,
+      "acceptance_passed": true,
+      "telemetry": {
+        "input_tokens": 53674,
+        "output_tokens": 321,
+        "cached_input_tokens": 47488,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 4,
+        "reflex_calls": 4,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "exclusion_reason": null
+    }
+  ],
+  "pairs": [
+    {
+      "pair_id": 3,
+      "off": {
+        "input_tokens": 17189,
+        "output_tokens": 109,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "on": {
+        "input_tokens": 53718,
+        "output_tokens": 339,
+        "cached_input_tokens": 34944,
+        "reasoning_output_tokens": 13,
+        "completed_turns": 1,
+        "mcp_calls": 4,
+        "reflex_calls": 4,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "quality_matched": true,
+      "eligible": true,
+      "saved_tokens": -36759,
+      "saved_percent": -212.5043357613597,
+      "accounting": "input + output; cached input and reasoning output are reported separately, not added again",
+      "scope": "Only these sessions; include training sessions separately when computing cold-start or amortized savings."
+    },
+    {
+      "pair_id": 4,
+      "off": {
+        "input_tokens": 17332,
+        "output_tokens": 117,
+        "cached_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 0,
+        "reflex_calls": 0,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "on": {
+        "input_tokens": 53674,
+        "output_tokens": 321,
+        "cached_input_tokens": 47488,
+        "reasoning_output_tokens": 0,
+        "completed_turns": 1,
+        "mcp_calls": 4,
+        "reflex_calls": 4,
+        "failed_mcp_calls": 0,
+        "valid_usage": true
+      },
+      "quality_matched": true,
+      "eligible": true,
+      "saved_tokens": -36546,
+      "saved_percent": -209.44466731617857,
+      "accounting": "input + output; cached input and reasoning output are reported separately, not added again",
+      "scope": "Only these sessions; include training sessions separately when computing cold-start or amortized savings."
+    }
+  ]
+}

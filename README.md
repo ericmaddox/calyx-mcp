@@ -10,8 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-9%20passed-brightgreen.svg)](tests/)
-[![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
+[![Tests](https://img.shields.io/badge/tests-pytest-blue.svg)](tests/)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
 
@@ -20,10 +19,10 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 ## At a Glance
 
 * **The Problem**: AI coding agents repeatedly consume thousands of LLM prompt tokens and multi-second roundtrip latency diagnosing recurring bugs, antipatterns, and project constraints.
-* **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity to give agents instant, zero-token reflex memory.
-* **The Proof (Benchmark)**:
-  * **Latency**: **0.400 ms** (vs ~1,450 ms LLM API roundtrip — **>3,600x faster**)
-  * **Token Cost**: **0 tokens** (100% local associative memory)
+* **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity for local reflex memory.
+* **Measurement boundaries**:
+  * **Local computation**: No LLM inference call is made by Calyx itself.
+  * **Agent token savings**: Workload-dependent. Tool schemas, calls, results and subsequent reasoning still contribute to agent usage. See the [measurement guide and pilot results](docs/measurement.md).
 
 ---
 
@@ -41,7 +40,7 @@ The name **Calyx** was chosen because this MCP server functions as that exact in
 
 Traditional AI coding workflows incur substantial token overhead and multi-second latency by repeatedly sending multi-thousand-token prompt context to Large Language Models (LLMs) to detect recurring bugs, antipatterns, or architectural guidelines.
 
-Calyx provides local, zero-token associative memory modeled after the *Drosophila melanogaster* (fruit fly) Mushroom Body circuit. Code snippets and AST structures are expanded into high-dimensional, ultra-sparse Kenyon Cell representations ($D=2048, k=102$). Synaptic plasticity between Kenyon Cells and Mushroom Body Output Neurons (MBONs) is modulated by reward and punishment signals (dopamine), delivering sub-millisecond pattern recognition without LLM inference costs.
+Calyx provides local associative memory modeled after the *Drosophila melanogaster* (fruit fly) Mushroom Body circuit. Code snippets and AST structures are expanded into high-dimensional, ultra-sparse Kenyon Cell representations ($D=2048, k=102$). Synaptic plasticity between Kenyon Cells and Mushroom Body Output Neurons (MBONs) is modulated by reward and punishment signals (dopamine). Local lookup latency and end-to-end agent usage should be measured separately.
 
 ---
 
@@ -80,7 +79,7 @@ Calyx provides local, zero-token associative memory modeled after the *Drosophil
 
 ## Benchmark and Token Savings
 
-The following performance metrics were measured on a Windows x86_64 host running Python 3.13 with native NumPy operations:
+The historical local measurements below were reported on a Windows x86_64 host running Python 3.13 with native NumPy operations. The LLM latency and token figures are illustrative assumptions, not paired agent measurements. Zero local inference calls does not imply zero model-visible tool tokens or 100% end-to-end savings. Use the [reproducible benchmarks](docs/measurement.md) to measure your workload, including misses and false alarms.
 
 ### Test Execution Log
 
@@ -120,9 +119,9 @@ Traditional LLM Querying Loop:
   * Debugging Loop:     ~2400 tokens per repeated bug
 
 Calyx Mushroom Body Reflex:
-  * Latency per review: 0.400 ms (~3,628x speedup)
+  * Latency per review: 0.400 ms (local measurement only)
   * Token Cost:         0 tokens (Local Fly-LSH sparse projection)
-  * Token Efficiency:   100% of LLM tokens saved on learned code anti-patterns
+  * Agent Token Savings: Not measured in this local execution log
 
 ============================================================================
               MUSHROOM BODY NEURAL ARCHITECTURE STATE
@@ -140,8 +139,8 @@ Calyx Mushroom Body Reflex:
 
 | Metric | Traditional LLM Inspection | Calyx Mushroom Body | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Latency** | ~1,450 ms | **0.400 ms** | **3,628x faster** |
-| **Token Consumption** | 650 - 2,400 tokens | **0 tokens** | **100% token savings** |
+| **Latency** | ~1,450 ms (assumed) | **0.400 ms** (local) | End-to-end speedup unmeasured |
+| **Token Consumption** | 650 - 2,400 tokens (assumed) | No local LLM calls | Agent savings require paired usage logs |
 | **Memory Footprint** | External API | **< 15 MB RAM** | Local execution |
 | **Pattern Match Type** | Full prompt parsing | **Sparse Kenyon Cell overlap** | Deterministic associative recall |
 
