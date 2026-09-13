@@ -10,6 +10,16 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 
 ---
 
+## Why "Calyx"?
+
+In insect neuroanatomy, the **Calyx** (plural: *calyces*) is the primary input neuropil of the **Mushroom Body** (*Corpora Pedunculata*)—the learning and memory center of the *Drosophila melanogaster* brain. Within the calyx, olfactory and sensory Projection Neurons (PNs) synapse directly onto the clawed dendritic arborizations of thousands of Kenyon Cells (KCs).
+
+It is inside the calyx that dense, low-dimensional sensory signals undergo high-dimensional sparse expansion, turning raw input into a distinct neural fingerprint that dopaminergic circuits can reinforce or suppress.
+
+The name **Calyx** was chosen because this MCP server functions as that exact input and associative expansion layer for AI coding agents: converting raw code AST tokens into high-dimensional, ultra-sparse Kenyon Cell representations that drive instantaneous (<0.5 ms) reflexes, pattern recognition, and persistent synaptic memory without LLM inference costs.
+
+---
+
 ## Overview
 
 Traditional AI coding workflows incur substantial token overhead and multi-second latency by repeatedly sending multi-thousand-token prompt context to Large Language Models (LLMs) to detect recurring bugs, antipatterns, or architectural guidelines.
