@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/calyx_banner.jpg" alt="Calyx MCP - Bio-Inspired Code Reflex Engine" width="100%" />
+  <img src="https://raw.githubusercontent.com/ericmaddox/calyx-mcp/main/assets/calyx_banner.jpg" alt="Calyx MCP - Bio-Inspired Code Reflex Engine" width="100%" />
 </p>
 
 # Calyx MCP

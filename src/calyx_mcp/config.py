@@ -47,7 +47,7 @@ class StorageConfig:
 class ServerConfig:
     """MCP Server Settings"""
     server_name: str = "calyx-mcp"
-    version: str = "1.0.3"
+    version: str = "1.0.4"
     log_level: str = "INFO"
     transport: str = "stdio"
 
