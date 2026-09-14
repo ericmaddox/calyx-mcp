@@ -1,6 +1,6 @@
 """
-Token Economics Benchmark & Validation Suite for Calyx MCP.
-Quantifies tool payload sizes, response token footprints, and token savings ROI models.
+Approximate payload budgets and an illustrative token ROI calculation.
+These tests do not measure provider tokens or end-to-end agent savings.
 """
 import json
 import pytest
@@ -42,12 +42,12 @@ async def test_reflex_response_payload_token_footprint(server):
     assert tokens < 80, f"Reflex response exceeds budget: {tokens} tokens"
 
 
-def test_token_savings_roi_model():
+def test_hypothetical_roi_includes_no_avoided_repairs():
     """
-    Mathematical ROI validation:
-    Calculates net token balance over typical agent session profiles.
+    Demonstrate the assumptions, including negative ROI when no work is avoided.
+    None of the constants below come from an agent experiment.
     """
-    # Profile 1: Standard agent session
+    # Hypothetical session (not an observed or representative workload):
     # - Schema overhead (cached in modern agents, but assumed active): ~400 tokens
     # - 10 reflex checks: 10 * 45 tokens = 450 tokens
     # - 1 bug intercepted (avoiding 1 full re-prompt + stack trace + re-implementation turn):
@@ -61,10 +61,10 @@ def test_token_savings_roi_model():
     gross_savings = 1 * cost_of_llm_repair_turn
     net_savings = gross_savings - total_calyx_cost
 
-    # Net savings must be decisively positive (> 4,000 tokens saved)
-    assert net_savings > 4000, f"Expected positive token ROI, got net {net_savings}"
+    assert net_savings == 4650  # Conditional on actually avoiding that repair.
+    assert 0 * cost_of_llm_repair_turn - total_calyx_cost == -850
 
     # Profile 2: High bug-density or multi-agent collaboration (3 bugs intercepted)
     gross_savings_multi = 3 * cost_of_llm_repair_turn
     net_savings_multi = gross_savings_multi - total_calyx_cost
-    assert net_savings_multi > 14000
+    assert net_savings_multi == 15650

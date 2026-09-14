@@ -94,6 +94,10 @@ class MushroomBodyMemory:
                 tmp_meta.replace(self.metadata_path)
         except Exception as e:
             logger.error(f"Failed to persist Calyx memory to disk: {e}")
+            raise OSError(
+                "Failed to persist Calyx memory; in-memory changes or partial disk "
+                "writes may already exist. Inspect state before retrying."
+            ) from e
 
     def apply_decay(self) -> None:
         """Applies passive synaptic weight decay towards baseline (1.0)"""
@@ -158,8 +162,9 @@ class MushroomBodyMemory:
                 "total_memories_stored": len(self.records)
             }
 
-    async def query_similarity(self, query_code: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Finds closest previously stored code patterns using Fly-LSH Hamming distance"""
+    async def query_similarity(self, query_code: str, top_k: int = 5,
+                               *, failures_only: bool = False) -> List[Dict[str, Any]]:
+        """Find nearest records, optionally filtering failures before truncation."""
         async with self._lock:
             if not self.records:
                 return []
@@ -169,6 +174,8 @@ class MushroomBodyMemory:
             
             scored_records = []
             for idx, rec in enumerate(self.records):
+                if failures_only and rec["outcome"].lower() not in ("failure", "failed", "bug", "error"):
+                    continue
                 rec_set = set(rec["active_indices"])
                 intersection = len(query_set.intersection(rec_set))
                 union = len(query_set.union(rec_set))

@@ -45,8 +45,9 @@ class ReflexDecisionEngine:
         # Baseline is 1.0 (pristine/neutral)
         confidence = float(abs(valence - 1.0) / 1.0)
 
-        # Check nearest previously stored memory records
-        matches = await self.memory.query_similarity(code, top_k=5)
+        # Select failures before truncation so exact rewards cannot hide a
+        # qualifying failure. Public associative queries still return all outcomes.
+        matches = await self.memory.query_similarity(code, top_k=5, failures_only=True)
         past_bug_match = 0.0
         bug_reason = None
         

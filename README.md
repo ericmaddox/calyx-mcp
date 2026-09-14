@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-51%20passed-brightgreen.svg)](tests/)
 [![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
@@ -20,10 +20,10 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 ## At a Glance
 
 * **The Problem**: AI coding agents repeatedly consume thousands of LLM prompt tokens and multi-second roundtrip latency diagnosing recurring bugs, antipatterns, and project constraints.
-* **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity to give agents instant, zero-token reflex memory.
-* **The Proof (Benchmark)**:
+* **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity for local associative memory without an internal LLM call.
+* **Historical local benchmark**:
   * **Latency**: **0.400 ms** (vs ~1,450 ms LLM API roundtrip — **>3,600x faster**)
-  * **Token Cost**: **0 tokens** (100% local associative memory)
+  * **Local inference calls**: zero. End-to-end agent tokens include schemas, calls, results and reasoning; savings require paired usage measurements.
 
 ---
 
@@ -80,7 +80,7 @@ Calyx provides local, zero-token associative memory modeled after the *Drosophil
 
 ## Benchmark and Token Savings
 
-The following performance metrics were measured on a Windows x86_64 host running Python 3.13 with native NumPy operations:
+The historical local timings below were reported on a Windows x86_64 host running Python 3.13 with native NumPy operations. The LLM latency and token figures are illustrative assumptions, not paired agent measurements. These historical timings have not been remeasured for this change; zero local inference calls does not imply zero model-visible tool tokens.
 
 ### Test Execution Log
 
@@ -122,7 +122,7 @@ Traditional LLM Querying Loop:
 Calyx Mushroom Body Reflex:
   * Latency per review: 0.400 ms (~3,628x speedup)
   * Token Cost:         0 tokens (Local Fly-LSH sparse projection)
-  * Token Efficiency:   100% of LLM tokens saved on learned code anti-patterns
+  * Agent Tokens Saved: Not measured by this local benchmark
 
 ============================================================================
               MUSHROOM BODY NEURAL ARCHITECTURE STATE
@@ -141,7 +141,7 @@ Calyx Mushroom Body Reflex:
 | Metric | Traditional LLM Inspection | Calyx Mushroom Body | Improvement |
 | :--- | :--- | :--- | :--- |
 | **Latency** | ~1,450 ms | **0.400 ms** | **3,628x faster** |
-| **Token Consumption** | 650 - 2,400 tokens | **0 tokens** | **100% token savings** |
+| **Token Consumption** | 650 - 2,400 tokens (assumed) | No local LLM calls | Agent savings not measured here |
 | **Memory Footprint** | External API | **< 15 MB RAM** | Local execution |
 | **Pattern Match Type** | Full prompt parsing | **Sparse Kenyon Cell overlap** | Deterministic associative recall |
 
@@ -266,13 +266,13 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ## Running Tests
 
-Execute the complete 46-test multi-tiered test suite:
+Execute the 51-test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Results (46 / 46 Passing)
+### Test Suite Results (51 / 51 Passing)
 
 | Test Suite | Scope & Invariants Tested | Test Count | Status |
 | :--- | :--- | :---: | :---: |
@@ -283,13 +283,29 @@ python -m pytest tests/ -v
 | **`tests/unit/test_memory.py`** | Dopaminergic PAM reward / PPL1 punishment updates, synaptic weight bounds $[0.0, 5.0]$ | 2 | **PASSED** |
 | **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 1 | **PASSED** |
 | **`tests/e2e/test_mcp_api_hardening.py`** | Input validation, parameter clamping, `-32601` method errors, resources read/list, ping | 6 | **PASSED** |
-| **`tests/e2e/test_concurrency_stress.py`** | Thread-safety & async lock correctness under 50 simultaneous agent workers | 1 | **PASSED** |
+| **`tests/e2e/test_concurrency_stress.py`** | 50 coroutines against one server and event loop; not a thread/process concurrency test | 1 | **PASSED** |
 | **`tests/e2e/test_outcome_validation.py`** | 15 parametrized valid and invalid input formats (rejects arbitrary strings, booleans, empty strings) | 15 | **PASSED** |
 | **`tests/e2e/test_tool_annotations.py`** | MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) | 2 | **PASSED** |
-| **`tests/e2e/test_mcp_stdio.py`** | End-to-end MCP JSON-RPC 2.0 stdio initialization, tool listing, and tool dispatch | 1 | **PASSED** |
-| **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across process restarts | 1 | **PASSED** |
-| **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), mathematical multi-turn ROI | 3 | **PASSED** |
-| **Total** | **Comprehensive Full Coverage** | **46** | **100% PASS** |
+| **`tests/e2e/test_mcp_stdio.py`** | In-process JSON-RPC handler initialization, tool listing, and dispatch | 1 | **PASSED** |
+| **`tests/integration/test_persistence.py`** | Weight and record reload into a second instance in the same process | 1 | **PASSED** |
+| **`tests/e2e/test_release_followups.py`** | Hidden-failure regression in both orders, weight/metadata write errors, actual stdio learning and restart | 5 | **PASSED** |
+| **`tests/benchmarks/test_token_economics.py`** | Character-count payload estimates and hypothetical ROI, including zero avoided repairs; no agent usage measured | 3 | **PASSED** |
+| **Total** | **Passing cases, not a code-coverage percentage** | **51** | **100% PASS** |
+
+The ROI calculation uses assumed costs and avoided work. Its arithmetic does not
+establish token savings. Compare equivalent agent tasks with actual input,
+output and cached-input telemetry; cached input is already part of input.
+
+Learning outcomes remain caller-reported: `safe` means a rewarded association,
+not proof of correctness. The reflex checks matching failures across retained
+records before selecting its nearest failures; ordinary queries still return
+the nearest records of either outcome. An old failure can therefore continue to
+trigger `avoid` while it remains in the bounded history.
+
+Disk-write failures now return an error instead of acknowledging `recorded`.
+This is not transactional rollback: RAM may already be updated and either of the
+two persisted files may already have changed. Inspect state before retrying a
+failed write; blindly repeating learning can apply the reward/punishment twice.
 
 ---
 
