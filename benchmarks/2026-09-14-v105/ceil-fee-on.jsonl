@@ -1,0 +1,4 @@
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"code\":\"def charge_units(total, quantum):\\n    return (total + quantum - 1) // quantum\"}"}}
+{"type": "item.completed", "item": {"id": "item_1", "type": "agent_message", "text": "{\"code\":\"def charge_units(total, quantum):\\n    return (total + quantum - 1) // quantum\"}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 54647, "cached_input_tokens": 32256, "cache_write_input_tokens": 0, "output_tokens": 490, "reasoning_output_tokens": 335}}

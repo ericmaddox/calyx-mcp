@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-51%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-58%20passed-brightgreen.svg)](tests/)
 [![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
@@ -79,6 +79,12 @@ Calyx provides local, zero-token associative memory modeled after the *Drosophil
 ---
 
 ## Benchmark and Token Savings
+
+An [actual v1.0.5 agent-usage pilot](docs/token-trial-v105.md) records six fresh
+Luna sessions against 100 synthetic lessons. Only one pair met the retrieval
+protocol in both arms; it used 43,591 more tokens with Calyx. Failed attempts are
+retained. This bounded pilot does not demonstrate end-to-end token savings;
+zero internal LLM calls and agent usage are different measurements.
 
 The performance metrics below were measured on a Windows x86_64 host running Python 3.13 with native NumPy operations. Because Fly-LSH sparse projection and synaptic valence calculations execute locally in memory, pattern recognition requires zero external LLM inference calls:
 
@@ -266,13 +272,13 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ## Running Tests
 
-Execute the 51-test suite:
+Execute the 58-test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Results (51 / 51 Passing)
+### Test Suite Results (58 / 58 Passing)
 
 | Test Suite | Scope & Invariants Tested | Test Count | Status |
 | :--- | :--- | :---: | :---: |
@@ -290,7 +296,9 @@ python -m pytest tests/ -v
 | **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across instances | 1 | **PASSED** |
 | **`tests/e2e/test_release_followups.py`** | Hidden-failure recall across insertion orders, disk write error propagation, and stdio subprocess restart | 5 | **PASSED** |
 | **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), and mathematical ROI modeling | 3 | **PASSED** |
-| **Total** | **51 Verified Invariants** | **51** | **100% PASS** |
+| **`tests/unit/test_history_reuse_benchmark.py`** | Synthetic corpus integrity and repair validation, including hardcoded-value rejection | 4 | **PASSED** |
+| **`tests/unit/test_history_usage.py`** | Negative savings, cache accounting, invalid telemetry and ineligible pairs | 3 | **PASSED** |
+| **Total** | **58 passing test cases** | **58** | **100% PASS** |
 
 > [!NOTE]
 > **Persistence & Error Handling**: Synaptic weights and associative records persist locally in `~/.calyx/`. File writes use atomic replacements (`.tmp` to target). In the event of an I/O or filesystem error during disk persistence, an `OSError` is raised and propagated to the MCP caller with actionable diagnostics rather than falsely acknowledging successful recording.
