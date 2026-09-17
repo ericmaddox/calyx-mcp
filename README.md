@@ -271,6 +271,24 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ---
 
+## Recommended Agent Rules (`AGENTS.md` / `.cursorrules` / `CLAUDE.md`)
+
+To ensure AI coding agents consistently leverage Calyx before applying code changes and reinforce synapses after testing, add this policy to your project's `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, or `.cursorrules`:
+
+```markdown
+## Calyx Associative Memory Policy
+
+1. **Pre-Flight Reflex Check (Before Modifying Code)**:
+   - Before writing or modifying functions, call `check_code_reflex(code=...)`.
+   - If `status: "avoid"`, do not proceed with that pattern. Review the past bug warning and choose an alternative approach.
+
+2. **Post-Execution Learning (After Testing)**:
+   - If tests fail, call `remember_code_outcome(code=..., outcome="failure", error_message=...)`.
+   - If tests pass, call `remember_code_outcome(code=..., outcome="success")`.
+```
+
+---
+
 ## Running Tests
 
 Execute the 59-test suite:
