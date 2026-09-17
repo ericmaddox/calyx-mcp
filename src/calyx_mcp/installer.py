@@ -6,6 +6,7 @@ Google Antigravity, Windsurf, Roo Code, Cline, and Zed.
 
 import os
 import sys
+import re
 import json
 import shutil
 import platform
@@ -258,15 +259,26 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
         data: Dict[str, Any] = {}
 
         if path.exists():
-            # Create safety backup
+            # 1. Preserve pristine original backup if not already present
+            orig_bak = path.with_suffix(path.suffix + ".orig.bak")
+            if not orig_bak.exists():
+                shutil.copy2(path, orig_bak)
+
+            # 2. Maintain standard .bak of previous state
             bak_path = path.with_suffix(path.suffix + ".bak")
             shutil.copy2(path, bak_path)
 
+            raw_text = path.read_text(encoding="utf-8")
             try:
-                with open(path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-            except Exception as e:
-                return False, f"Existing config at {path} is invalid JSON: {e}"
+                data = json.loads(raw_text)
+            except json.JSONDecodeError:
+                # Attempt to parse JSON with comments / trailing commas stripped (e.g. Zed / VS Code JSONC)
+                clean_text = re.sub(r'//.*?$|/\*.*?\*/', '', raw_text, flags=re.MULTILINE | re.DOTALL)
+                clean_text = re.sub(r',\s*([\]}])', r'\1', clean_text)
+                try:
+                    data = json.loads(clean_text)
+                except Exception as e:
+                    return False, f"Existing config at {path} is invalid JSON: {e}"
 
         entry = build_calyx_entry(mode=mode, schema_type=schema)
 
@@ -280,7 +292,7 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
             data["mcpServers"]["calyx"] = entry
 
         # Atomic write
-        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        tmp_path = path.with_suffix(path.suffix + f".tmp_{os.getpid()}")
         with open(tmp_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
         tmp_path.replace(path)

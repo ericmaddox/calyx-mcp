@@ -9,7 +9,14 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from .config import CalyxConfig, get_default_config
+from .config import (
+    CalyxConfig,
+    get_default_config,
+    MAX_CODE_INPUT_LENGTH,
+    MAX_ERROR_MSG_LENGTH,
+    MAX_TAG_COUNT,
+    MAX_TAG_LENGTH,
+)
 from .memory import MushroomBodyMemory
 from .reflex import ReflexDecisionEngine
 from .tools import calyx_tools_registry, get_tool_schemas
@@ -127,12 +134,16 @@ class CalyxMCPServer:
             return self._jsonrpc_error(req_id, -32000, str(e))
 
     async def execute_tool(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute specific Calyx tool"""
+        """Execute specific Calyx tool with strict input bounds checking"""
         if name == "check_code_reflex":
             raw_code = args.get("code") or args.get("code_snippet") or args.get("query_code") or args.get("query")
             if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
                 raise ValueError("Must provide non-empty 'code' string to evaluate reflex.")
+            if len(raw_code) > MAX_CODE_INPUT_LENGTH:
+                raise ValueError(f"Code string exceeds maximum length of {MAX_CODE_INPUT_LENGTH} characters.")
             context = args.get("context") or args.get("language")
+            if context is not None and (not isinstance(context, str) or len(context) > MAX_ERROR_MSG_LENGTH):
+                raise ValueError(f"context parameter must be a string <= {MAX_ERROR_MSG_LENGTH} characters.")
             outcome = await self.reflex_engine.evaluate_reflex(raw_code, context)
             return outcome.__dict__
 
@@ -140,17 +151,31 @@ class CalyxMCPServer:
             raw_code = args.get("code") or args.get("code_snippet") or args.get("query_code")
             if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
                 raise ValueError("Must provide non-empty 'code' string.")
+            if len(raw_code) > MAX_CODE_INPUT_LENGTH:
+                raise ValueError(f"Code string exceeds maximum length of {MAX_CODE_INPUT_LENGTH} characters.")
             outcome_val = args.get("outcome")
             if not isinstance(outcome_val, str) or outcome_val not in ("success", "failure"):
                 raise ValueError("outcome must be 'success' or 'failure'; it is required")
             error_msg = args.get("error_message") or args.get("lesson")
+            if error_msg is not None and (not isinstance(error_msg, str) or len(error_msg) > MAX_ERROR_MSG_LENGTH):
+                raise ValueError(f"error_message must be a string <= {MAX_ERROR_MSG_LENGTH} characters.")
             tags = args.get("tags")
+            if tags is not None:
+                if not isinstance(tags, list):
+                    raise ValueError("tags must be a list of strings.")
+                if len(tags) > MAX_TAG_COUNT:
+                    raise ValueError(f"tags list exceeds maximum count of {MAX_TAG_COUNT}.")
+                for t in tags:
+                    if not isinstance(t, str) or len(t) > MAX_TAG_LENGTH:
+                        raise ValueError(f"Each tag must be a string <= {MAX_TAG_LENGTH} characters.")
             return await self.memory.remember(raw_code, outcome_val, error_msg, tags)
 
         elif name == "query_associative_memory":
             query_code = args.get("query_code") or args.get("query") or args.get("code") or args.get("code_snippet")
             if not query_code or not isinstance(query_code, str) or not query_code.strip():
                 raise ValueError("Must provide non-empty 'query_code' string.")
+            if len(query_code) > MAX_CODE_INPUT_LENGTH:
+                raise ValueError(f"query_code exceeds maximum length of {MAX_CODE_INPUT_LENGTH} characters.")
             try:
                 top_k = int(args.get("top_k", 5))
             except (ValueError, TypeError):

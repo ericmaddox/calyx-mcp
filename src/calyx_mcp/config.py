@@ -33,6 +33,13 @@ class PlasticityConfig:
     punishment_multiplier: float = 1.5
 
 
+# Security & Denial of Service Bounds
+MAX_CODE_INPUT_LENGTH: int = 250_000      # 250 KB max code string size
+MAX_ERROR_MSG_LENGTH: int = 10_000        # 10 KB max error message size
+MAX_TAG_COUNT: int = 50                   # Max 50 metadata tags per record
+MAX_TAG_LENGTH: int = 100                 # Max 100 chars per tag string
+
+
 @dataclass
 class StorageConfig:
     """Persistent Storage Configuration"""

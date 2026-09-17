@@ -39,19 +39,44 @@ class MushroomBodyMemory:
         
         # Ensure storage directory exists and load weights
         self.storage_dir = Path(self.storage_cfg.storage_dir)
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self._ensure_secure_dir(self.storage_dir)
         self.weights_path = self.storage_dir / self.storage_cfg.weights_filename
         self.metadata_path = self.storage_dir / self.storage_cfg.metadata_filename
+        self._save_seq = 0
         
         self.load_from_disk()
 
+    @staticmethod
+    def _ensure_secure_dir(directory: Path) -> None:
+        """Create directory if needed and enforce 0700 permissions on POSIX systems."""
+        directory.mkdir(parents=True, exist_ok=True)
+        if os.name != "nt":
+            try:
+                os.chmod(directory, 0o700)
+            except OSError:
+                pass
+
+    @staticmethod
+    def _ensure_secure_file(filepath: Path) -> None:
+        """Enforce 0600 permissions on POSIX systems."""
+        if os.name != "nt" and filepath.exists():
+            try:
+                os.chmod(filepath, 0o600)
+            except OSError:
+                pass
+
     def load_from_disk(self) -> bool:
-        """Load synaptic weights and memory metadata from disk"""
+        """Load synaptic weights and memory metadata from disk with strict deserialization guards"""
         try:
             if self.weights_path.exists():
-                data = np.load(self.weights_path)
+                data = np.load(self.weights_path, allow_pickle=False)
                 if "weights" in data and len(data["weights"]) == self.kenyon_dim:
-                    self.weights = data["weights"].astype(np.float32)
+                    loaded = data["weights"].astype(np.float32)
+                    if np.isfinite(loaded).all():
+                        self.weights = loaded
+                    else:
+                        logger.warning("Corrupted non-finite weights found in weights file; resetting to baseline.")
+                        self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
             if self.metadata_path.exists():
                 with open(self.metadata_path, "r", encoding="utf-8") as f:
                     raw_records = json.load(f)
@@ -76,22 +101,28 @@ class MushroomBodyMemory:
             return False
 
     def save_to_disk(self) -> None:
-        """Atomic file save to prevent mid-write corruption"""
+        """Process-isolated atomic file save to prevent mid-write corruption and collisions"""
         try:
-            self.storage_dir.mkdir(parents=True, exist_ok=True)
+            self._ensure_secure_dir(self.storage_dir)
+            self._save_seq += 1
+            unique_tag = f"{os.getpid()}_{id(self)}_{self._save_seq}"
             
-            # 1. Atomic weights save (.tmp -> replace)
-            tmp_weights = self.weights_path.with_suffix(".tmp.npz")
+            # 1. Atomic weights save (.tmp_<pid>_<seq> -> replace)
+            tmp_weights = self.storage_dir / f".tmp_{unique_tag}_{self.storage_cfg.weights_filename}"
             np.savez_compressed(tmp_weights, weights=self.weights)
             if tmp_weights.exists():
+                self._ensure_secure_file(tmp_weights)
                 tmp_weights.replace(self.weights_path)
+                self._ensure_secure_file(self.weights_path)
                 
-            # 2. Atomic metadata save (.tmp -> replace)
-            tmp_meta = self.metadata_path.with_suffix(".tmp.json")
+            # 2. Atomic metadata save (.tmp_<pid>_<seq> -> replace)
+            tmp_meta = self.storage_dir / f".tmp_{unique_tag}_{self.storage_cfg.metadata_filename}"
             with open(tmp_meta, "w", encoding="utf-8") as f:
                 json.dump(self.records[-self.storage_cfg.max_records:], f, indent=2)
             if tmp_meta.exists():
+                self._ensure_secure_file(tmp_meta)
                 tmp_meta.replace(self.metadata_path)
+                self._ensure_secure_file(self.metadata_path)
         except Exception as e:
             logger.error(f"Failed to persist Calyx memory to disk: {e}")
             raise OSError(
@@ -214,8 +245,10 @@ class MushroomBodyMemory:
         async with self._lock:
             backup_file = None
             if backup and self.weights_path.exists():
-                backup_file = str(self.storage_dir / f"backup_{int(datetime.now().timestamp())}.npz")
-                np.savez_compressed(backup_file, weights=self.weights)
+                backup_path = self.storage_dir / f"backup_{int(datetime.now().timestamp())}.npz"
+                np.savez_compressed(backup_path, weights=self.weights)
+                self._ensure_secure_file(backup_path)
+                backup_file = str(backup_path)
             
             self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
             self.records = []
