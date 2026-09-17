@@ -7,7 +7,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/calyx-mcp?logo=pypi&logoColor=white&color=blue)](https://pypi.org/project/calyx-mcp/)
 [![PyPI - Status](https://img.shields.io/pypi/status/calyx-mcp?color=blue)](https://pypi.org/project/calyx-mcp/)
 [![GitHub Release](https://img.shields.io/github/v/release/ericmaddox/calyx-mcp?color=blue&logo=github)](https://github.com/ericmaddox/calyx-mcp/releases)
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-59%20passed-brightgreen.svg)](tests/)
@@ -171,7 +171,7 @@ Calyx registers the following tools conforming to the MCP JSON-RPC 2.0 specifica
 Evaluates a code snippet against synaptic valence weights and stored experiences in <0.5ms with 0 LLM prompt tokens.
 - **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**:
-  - `code` (string, required): The proposed code snippet, function, or diff to evaluate.
+  - `code` (string, required): The proposed code snippet, function, or diff to evaluate (aliases: `code_snippet`, `query_code`, `query`).
   - `context` (string, optional): Optional context or filename describing the task.
 - **Returns**: `status` (`avoid`, `safe`, `neutral`), `valence`, `confidence`, `similarity_with_past_bugs`, `warning`, `recommendation`.
 
@@ -179,7 +179,7 @@ Evaluates a code snippet against synaptic valence weights and stored experiences
 Applies one-shot dopamine reward (test passed) or punishment (test failed/bug) to Mushroom Body synaptic weights.
 - **Annotations**: `readOnlyHint: false`, `destructiveHint: true`, `idempotentHint: false`, `openWorldHint: false`
 - **Parameters**:
-  - `code` (string, required): The code snippet that was executed or tested.
+  - `code` (string, required): The code snippet that was executed or tested (aliases: `code_snippet`, `query_code`).
   - `outcome` (string, required): `"success"` (rewards synapses) or `"failure"` (punishes synapses).
   - `error_message` (string, optional): Error trace or description if outcome was `"failure"`.
   - `tags` (array of strings, optional): Categorical tags (e.g. `["auth", "database", "deadlock"]`).
@@ -189,8 +189,9 @@ Applies one-shot dopamine reward (test passed) or punishment (test failed/bug) t
 Searches stored code patterns using Fly-LSH sparse binary Hamming similarity.
 - **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**:
-  - `query_code` (string, required): Code snippet to search against associative memory.
+  - `query_code` (string, required): Code snippet to search against associative memory (aliases: `query`, `code`, `code_snippet`).
   - `top_k` (integer, optional): Number of nearest neighbors to return (default: `5`, clamped $[1, 50]$).
+  - `compact` (boolean, optional): Whether to return compact match objects to reduce prompt token footprint (default: `false`).
 - **Returns**: `query`, `matches_count`, `matches` (array of nearest records with similarity scores).
 
 ### 4. `inspect_memory_state`
