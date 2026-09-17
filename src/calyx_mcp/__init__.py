@@ -12,6 +12,7 @@ from .memory import MushroomBodyMemory
 from .reflex import ReflexDecisionEngine, ReflexOutcome
 from .tools import CalyxToolRegistry, get_tool_schemas
 from .server import CalyxMCPServer, create_mcp_server
+from .installer import inspect_targets, install_to_target, install_all_detected, init_agents_md
 
 __all__ = [
     "__version__",
@@ -26,4 +27,8 @@ __all__ = [
     "get_tool_schemas",
     "CalyxMCPServer",
     "create_mcp_server",
+    "inspect_targets",
+    "install_to_target",
+    "install_all_detected",
+    "init_agents_md",
 ]

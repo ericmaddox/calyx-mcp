@@ -219,8 +219,58 @@ def create_mcp_server(config_path: Optional[str] = None) -> CalyxMCPServer:
 
 
 def main() -> None:
-    """CLI entrypoint for calyx-server"""
+    """CLI entrypoint for calyx-mcp / calyx-server"""
     import argparse
+    from pathlib import Path
+    from .installer import inspect_targets, install_to_target, install_all_detected, init_agents_md
+
+    # Check for subcommands or default server mode
+    if len(sys.argv) > 1 and sys.argv[1] == "install":
+        parser = argparse.ArgumentParser(prog="calyx-mcp install", description="Install Calyx MCP into IDE configuration files")
+        parser.add_argument("--all", action="store_true", help="Install into all detected IDEs")
+        parser.add_argument("--target", type=str, help="Specific IDE target (claude, cursor, antigravity, windsurf, roo, cline, zed)")
+        parser.add_argument("--mode", type=str, default="python", choices=["python", "uvx"], help="Invocation command mode (python or uvx)")
+        parser.add_argument("--status", action="store_true", help="Show detected IDEs and configuration status")
+        args = parser.parse_args(sys.argv[2:])
+
+        if args.status or (not args.all and not args.target):
+            targets = inspect_targets()
+            print("\n=== Calyx MCP Target Discovery ===")
+            for t in targets:
+                det_str = "[Detected]" if t.detected else "[Not Found]"
+                cfg_str = "[Configured]" if t.configured else "[Not Configured]"
+                print(f"  * {t.name:<22} {det_str:<12} {cfg_str:<16} ({t.config_path})")
+            print("\nRun 'calyx-mcp install --all' or 'calyx-mcp install --target <name>' to configure.")
+            return
+
+        if args.all:
+            results = install_all_detected(mode=args.mode)
+            print("\n=== Calyx MCP Installation Results ===")
+            for name, success, msg in results:
+                icon = "[OK]" if success else "[ERROR]"
+                print(f"  {icon} {name}: {msg}")
+            return
+
+        if args.target:
+            success, msg = install_to_target(args.target.lower(), mode=args.mode)
+            icon = "[OK]" if success else "[ERROR]"
+            print(f"{icon} {msg}")
+            return
+
+    elif len(sys.argv) > 1 and sys.argv[1] == "init":
+        parser = argparse.ArgumentParser(prog="calyx-mcp init", description="Initialize AGENTS.md in current or target workspace")
+        parser.add_argument("--path", type=str, default=".", help="Target workspace directory")
+        parser.add_argument("--force", action="store_true", help="Overwrite existing AGENTS.md")
+        args = parser.parse_args(sys.argv[2:])
+
+        created, dest = init_agents_md(target_dir=Path(args.path), overwrite=args.force)
+        if created:
+            print(f"[OK] Created Calyx agent directives in {dest}")
+        else:
+            print(f"[NOTE] AGENTS.md already exists at {dest}. Use --force to overwrite.")
+        return
+
+    # Default server invocation
     parser = argparse.ArgumentParser(description="Calyx MCP Server")
     parser.add_argument("--config", type=str, help="Path to configuration file")
     parser.add_argument("--transport", type=str, default="stdio", choices=["stdio", "sse"], help="Transport mode")
