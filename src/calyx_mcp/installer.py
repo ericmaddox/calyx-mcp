@@ -233,10 +233,23 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
     Preserves all existing configured servers and creates a .bak backup.
     """
     specs = get_system_paths(system, base_dir)
-    if target_id not in specs:
-        return False, f"Unknown target: {target_id}. Supported: {', '.join(specs.keys())}"
+    target_norm = target_id.lower().strip()
 
-    info = specs[target_id]
+    # Target Aliases
+    aliases = {
+        "gemini": "antigravity",
+        "agy": "antigravity",
+        "antigravity_ide": "antigravity",
+        "codeium": "windsurf",
+        "vscode": "roo",
+        "vs_code": "roo",
+    }
+    target_norm = aliases.get(target_norm, target_norm)
+
+    if target_norm not in specs:
+        return False, f"Unknown target: {target_id}. Supported: {', '.join(specs.keys())} (or 'gemini', 'vscode', 'codeium')"
+
+    info = specs[target_norm]
     path: Path = info["path"]
     schema: str = info["schema"]
 

@@ -143,3 +143,21 @@ def test_init_agents_md(tmp_path):
     created_overwrite, _ = init_agents_md(target_dir=tmp_path, overwrite=True)
     assert created_overwrite
     assert "Calyx MCP Agent Directives" in dest.read_text(encoding="utf-8")
+
+
+def test_install_target_aliases(tmp_path):
+    """Test alias names like 'gemini', 'codeium', and 'vscode' map correctly"""
+    success_gemini, _ = install_to_target("gemini", base_dir=tmp_path)
+    assert success_gemini
+
+    paths = get_system_paths(base_dir=tmp_path)
+    assert paths["antigravity"]["path"].exists()
+
+    success_codeium, _ = install_to_target("codeium", base_dir=tmp_path)
+    assert success_codeium
+    assert paths["windsurf"]["path"].exists()
+
+    success_vscode, _ = install_to_target("vscode", base_dir=tmp_path)
+    assert success_vscode
+    assert paths["roo"]["path"].exists()
+
