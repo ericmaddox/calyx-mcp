@@ -129,7 +129,7 @@ class CalyxMCPServer:
     async def execute_tool(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """Execute specific Calyx tool"""
         if name == "check_code_reflex":
-            raw_code = args.get("code") or args.get("code_snippet")
+            raw_code = args.get("code") or args.get("code_snippet") or args.get("query_code") or args.get("query")
             if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
                 raise ValueError("Must provide non-empty 'code' string to evaluate reflex.")
             context = args.get("context") or args.get("language")
@@ -137,7 +137,7 @@ class CalyxMCPServer:
             return outcome.__dict__
 
         elif name == "remember_code_outcome":
-            raw_code = args.get("code") or args.get("code_snippet")
+            raw_code = args.get("code") or args.get("code_snippet") or args.get("query_code")
             if not raw_code or not isinstance(raw_code, str) or not raw_code.strip():
                 raise ValueError("Must provide non-empty 'code' string.")
             outcome_val = args.get("outcome")
@@ -148,7 +148,7 @@ class CalyxMCPServer:
             return await self.memory.remember(raw_code, outcome_val, error_msg, tags)
 
         elif name == "query_associative_memory":
-            query_code = args.get("query_code") or args.get("code")
+            query_code = args.get("query_code") or args.get("query") or args.get("code") or args.get("code_snippet")
             if not query_code or not isinstance(query_code, str) or not query_code.strip():
                 raise ValueError("Must provide non-empty 'query_code' string.")
             try:
@@ -156,7 +156,18 @@ class CalyxMCPServer:
             except (ValueError, TypeError):
                 raise ValueError("top_k must be a valid integer.")
             top_k = max(1, min(top_k, 50))
+            compact = bool(args.get("compact", False))
             matches = await self.memory.query_similarity(query_code, top_k=top_k)
+            if compact:
+                matches = [
+                    {
+                        "id": m["id"],
+                        "similarity": m["similarity"],
+                        "outcome": m["outcome"],
+                        "error_message": m.get("error_message", "")
+                    }
+                    for m in matches
+                ]
             return {"query": query_code[:100], "matches_count": len(matches), "matches": matches}
 
         elif name == "inspect_memory_state":

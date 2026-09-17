@@ -79,12 +79,17 @@ class CalyxToolRegistry:
                     "properties": {
                         "query_code": {
                             "type": "string",
-                            "description": "The code query to search against associative memory."
+                            "description": "The code query to search against associative memory (accepts 'query_code', 'query', or 'code')."
                         },
                         "top_k": {
                             "type": "integer",
                             "default": 5,
                             "description": "Number of nearest neighbors to return."
+                        },
+                        "compact": {
+                            "type": "boolean",
+                            "default": False,
+                            "description": "Whether to return compact match objects to reduce prompt token footprint."
                         }
                     },
                     "required": ["query_code"]

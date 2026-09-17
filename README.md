@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-58%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-59%20passed-brightgreen.svg)](tests/)
 [![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
@@ -272,13 +272,13 @@ Add Calyx to your MCP client configuration file (e.g. `~/.gemini/config/mcp_conf
 
 ## Running Tests
 
-Execute the 58-test suite:
+Execute the 59-test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Results (58 / 58 Passing)
+### Test Suite Results (59 / 59 Passing)
 
 | Test Suite | Scope & Invariants Tested | Test Count | Status |
 | :--- | :--- | :---: | :---: |
@@ -288,7 +288,7 @@ python -m pytest tests/ -v
 | **`tests/unit/test_hasher.py`** | Fly-LSH $D=2048, k=102$ top-k sparsity, deterministic random projection, AST token extraction | 4 | **PASSED** |
 | **`tests/unit/test_memory.py`** | Dopaminergic PAM reward / PPL1 punishment updates, synaptic weight bounds $[0.0, 5.0]$ | 2 | **PASSED** |
 | **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 1 | **PASSED** |
-| **`tests/e2e/test_mcp_api_hardening.py`** | Input validation, parameter clamping, `-32601` method errors, resources read/list, ping | 6 | **PASSED** |
+| **`tests/e2e/test_mcp_api_hardening.py`** | Input validation, parameter clamping, aliases (`query`, `code`), compact mode, `-32601` method errors, resources read/list, ping | 7 | **PASSED** |
 | **`tests/e2e/test_concurrency_stress.py`** | Async lock correctness and state integrity under 50 concurrent agent coroutines | 1 | **PASSED** |
 | **`tests/e2e/test_outcome_validation.py`** | 15 parametrized valid and invalid input formats (rejects arbitrary strings, booleans, empty strings) | 15 | **PASSED** |
 | **`tests/e2e/test_tool_annotations.py`** | MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) | 2 | **PASSED** |
@@ -298,7 +298,7 @@ python -m pytest tests/ -v
 | **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), and mathematical ROI modeling | 3 | **PASSED** |
 | **`tests/unit/test_history_reuse_benchmark.py`** | Synthetic corpus integrity and repair validation, including hardcoded-value rejection | 4 | **PASSED** |
 | **`tests/unit/test_history_usage.py`** | Negative savings, cache accounting, invalid telemetry and ineligible pairs | 3 | **PASSED** |
-| **Total** | **58 passing test cases** | **58** | **100% PASS** |
+| **Total** | **59 passing test cases** | **59** | **100% PASS** |
 
 > [!NOTE]
 > **Persistence & Error Handling**: Synaptic weights and associative records persist locally in `~/.calyx/`. File writes use atomic replacements (`.tmp` to target). In the event of an I/O or filesystem error during disk persistence, an `OSError` is raised and propagated to the MCP caller with actionable diagnostics rather than falsely acknowledging successful recording.

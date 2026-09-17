@@ -121,3 +121,56 @@ async def test_resources_and_ping(server):
         "params": {"uri": "calyx://memory/metrics"}
     })
     assert "contents" in res_read["result"]
+
+
+@pytest.mark.asyncio
+async def test_parameter_aliasing_and_compact_output(server):
+    # 1. remember_code_outcome with code_snippet alias
+    rem_res = await server.handle_request({
+        "jsonrpc": "2.0",
+        "id": 11,
+        "method": "tools/call",
+        "params": {
+            "name": "remember_code_outcome",
+            "arguments": {
+                "code_snippet": "def add(a, b): return a + b",
+                "outcome": "failure",
+                "error_message": "Needs type checking",
+                "tags": ["math", "typing"]
+            }
+        }
+    })
+    assert "result" in rem_res
+    assert "content" in rem_res["result"]
+
+    # 2. check_code_reflex with query alias
+    reflex_res = await server.handle_request({
+        "jsonrpc": "2.0",
+        "id": 12,
+        "method": "tools/call",
+        "params": {
+            "name": "check_code_reflex",
+            "arguments": {"query": "def add(a, b): return a + b"}
+        }
+    })
+    assert "result" in reflex_res
+
+    # 3. query_associative_memory with query alias (standard and compact)
+    query_res = await server.handle_request({
+        "jsonrpc": "2.0",
+        "id": 13,
+        "method": "tools/call",
+        "params": {
+            "name": "query_associative_memory",
+            "arguments": {"query": "def add(a, b): return a + b", "compact": True}
+        }
+    })
+    assert "result" in query_res
+    import json
+    data = json.loads(query_res["result"]["content"][0]["text"])
+    assert data["matches_count"] >= 1
+    match = data["matches"][0]
+    assert "id" in match and "similarity" in match and "outcome" in match
+    # In compact mode, raw code_snippet and tags are omitted to save token budget
+    assert "tags" not in match
+    assert "code_snippet" not in match
