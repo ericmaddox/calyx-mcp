@@ -138,7 +138,7 @@ Calyx Mushroom Body Reflex:
   * Total Memories Stored:   1
   * Depressed Synapses (W):  102
   * Weights Min / Avg / Max: 0.775 / 0.9888 / 1.0
-  * Storage Directory:       C:\Users\EricM\.calyx
+  * Storage Directory:       ~/.calyx
 ============================================================================
 ```
 
