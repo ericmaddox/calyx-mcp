@@ -215,18 +215,38 @@ def inspect_targets(system: Optional[str] = None, base_dir: Optional[Path] = Non
     return results
 
 
-def build_calyx_entry(mode: str = "python", schema_type: str = "standard") -> Dict[str, Any]:
+def resolve_python_interpreter(python_path: Optional[str] = None) -> str:
+    """
+    Resolves the canonical Python interpreter path.
+    Prioritizes explicit python_path, then sys.executable (filtering test runners),
+    and falls back to python3 (POSIX) or python (Windows).
+    """
+    if python_path:
+        return str(Path(python_path))
+    
+    exe = sys.executable
+    if exe:
+        name = Path(exe).name.lower()
+        if not name.startswith("pytest") and not name.startswith("trial"):
+            return str(Path(exe))
+            
+    return "python3" if os.name != "nt" else "python"
+
+
+def build_calyx_entry(mode: str = "python", schema_type: str = "standard",
+                      python_path: Optional[str] = None) -> Dict[str, Any]:
     """Builds standard or Zed JSON payload for Calyx server entry."""
     if mode == "uvx":
         if schema_type == "zed":
             return {"command": "uvx", "args": ["calyx-mcp"]}
         return {"command": "uvx", "args": ["calyx-mcp"]}
     else:
-        return {"command": "python", "args": ["-m", "calyx_mcp.server"]}
+        interpreter = resolve_python_interpreter(python_path)
+        return {"command": interpreter, "args": ["-m", "calyx_mcp.server"]}
 
 
 def install_to_target(target_id: str, mode: str = "python", system: Optional[str] = None,
-                      base_dir: Optional[Path] = None) -> Tuple[bool, str]:
+                      base_dir: Optional[Path] = None, python_path: Optional[str] = None) -> Tuple[bool, str]:
     """
     Safely adds Calyx MCP configuration into the target IDE's JSON file.
     Preserves all existing configured servers and creates a .bak backup.
@@ -278,7 +298,7 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
                 except Exception as e:
                     return False, f"Existing config at {path} is invalid JSON: {e}"
 
-        entry = build_calyx_entry(mode=mode, schema_type=schema)
+        entry = build_calyx_entry(mode=mode, schema_type=schema, python_path=python_path)
 
         if schema == "zed":
             if "context_servers" not in data or not isinstance(data["context_servers"], dict):
@@ -302,20 +322,20 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
 
 
 def install_all_detected(mode: str = "python", system: Optional[str] = None,
-                         base_dir: Optional[Path] = None) -> List[Tuple[str, bool, str]]:
+                         base_dir: Optional[Path] = None, python_path: Optional[str] = None) -> List[Tuple[str, bool, str]]:
     """Configures all detected IDEs on the host."""
     targets = inspect_targets(system, base_dir)
     results = []
 
     for t in targets:
         if t.detected or t.config_path.exists():
-            success, msg = install_to_target(t.id, mode=mode, system=system, base_dir=base_dir)
+            success, msg = install_to_target(t.id, mode=mode, system=system, base_dir=base_dir, python_path=python_path)
             results.append((t.name, success, msg))
 
     # If no specific target folder was detected, configure Antigravity and Claude as defaults
     if not results:
         for default_id in ["antigravity", "claude"]:
-            success, msg = install_to_target(default_id, mode=mode, system=system, base_dir=base_dir)
+            success, msg = install_to_target(default_id, mode=mode, system=system, base_dir=base_dir, python_path=python_path)
             specs = get_system_paths(system, base_dir)
             results.append((specs[default_id]["name"], success, msg))
 

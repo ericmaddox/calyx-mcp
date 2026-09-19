@@ -255,6 +255,7 @@ def main() -> None:
         parser.add_argument("--all", action="store_true", help="Install into all detected IDEs")
         parser.add_argument("--target", type=str, help="Specific IDE target (claude, cursor, antigravity, windsurf, roo, cline, zed)")
         parser.add_argument("--mode", type=str, default="python", choices=["python", "uvx"], help="Invocation command mode (python or uvx)")
+        parser.add_argument("--python-path", type=str, default=None, help="Explicit path to Python interpreter")
         parser.add_argument("--status", action="store_true", help="Show detected IDEs and configuration status")
         args = parser.parse_args(sys.argv[2:])
 
@@ -269,7 +270,7 @@ def main() -> None:
             return
 
         if args.all:
-            results = install_all_detected(mode=args.mode)
+            results = install_all_detected(mode=args.mode, python_path=args.python_path)
             print("\n=== Calyx MCP Installation Results ===")
             for name, success, msg in results:
                 icon = "[OK]" if success else "[ERROR]"
@@ -277,7 +278,7 @@ def main() -> None:
             return
 
         if args.target:
-            success, msg = install_to_target(args.target.lower(), mode=args.mode)
+            success, msg = install_to_target(args.target.lower(), mode=args.mode, python_path=args.python_path)
             icon = "[OK]" if success else "[ERROR]"
             print(f"{icon} {msg}")
             return

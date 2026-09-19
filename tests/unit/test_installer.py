@@ -11,7 +11,8 @@ from calyx_mcp.installer import (
     install_to_target,
     install_all_detected,
     init_agents_md,
-    build_calyx_entry
+    build_calyx_entry,
+    resolve_python_interpreter
 )
 
 
@@ -32,7 +33,9 @@ def test_system_paths_definitions(tmp_path):
 
 def test_install_creates_new_config_and_preserves_structure(tmp_path):
     """Test installing to an unconfigured target creates valid JSON"""
-    success, msg = install_to_target("antigravity", mode="python", system="Windows", base_dir=tmp_path)
+    custom_python = "C:\\Python313\\python.exe"
+    success, msg = install_to_target("antigravity", mode="python", system="Windows",
+                                     base_dir=tmp_path, python_path=custom_python)
     assert success
     paths = get_system_paths(system="Windows", base_dir=tmp_path)
     cfg_file = paths["antigravity"]["path"]
@@ -43,7 +46,7 @@ def test_install_creates_new_config_and_preserves_structure(tmp_path):
 
     assert "mcpServers" in data
     assert "calyx" in data["mcpServers"]
-    assert data["mcpServers"]["calyx"]["command"] == "python"
+    assert data["mcpServers"]["calyx"]["command"] == custom_python
     assert data["mcpServers"]["calyx"]["args"] == ["-m", "calyx_mcp.server"]
 
 
@@ -161,4 +164,26 @@ def test_install_target_aliases(tmp_path):
     success_vscode, _ = install_to_target("vscode", base_dir=tmp_path)
     assert success_vscode
     assert paths["roo"]["path"].exists()
+
+
+def test_resolve_python_interpreter():
+    """Verify explicit override and default interpreter resolution"""
+    # Explicit path
+    assert resolve_python_interpreter("/custom/bin/python") == str(Path("/custom/bin/python"))
+    
+    # Default resolution (not empty)
+    default_exe = resolve_python_interpreter()
+    assert isinstance(default_exe, str)
+    assert len(default_exe) > 0
+
+
+def test_build_calyx_entry_python_modes():
+    """Verify standard entry generation with Python and uvx"""
+    entry_uvx = build_calyx_entry(mode="uvx")
+    assert entry_uvx["command"] == "uvx"
+    assert entry_uvx["args"] == ["calyx-mcp"]
+
+    entry_custom = build_calyx_entry(mode="python", python_path="/opt/python3/bin/python3")
+    assert entry_custom["command"] == str(Path("/opt/python3/bin/python3"))
+    assert entry_custom["args"] == ["-m", "calyx_mcp.server"]
 
