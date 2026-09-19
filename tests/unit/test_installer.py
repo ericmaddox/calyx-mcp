@@ -43,7 +43,8 @@ def test_install_creates_new_config_and_preserves_structure(tmp_path):
 
     assert "mcpServers" in data
     assert "calyx" in data["mcpServers"]
-    assert data["mcpServers"]["calyx"]["command"] == "calyx-mcp"
+    assert data["mcpServers"]["calyx"]["command"] == "python"
+    assert data["mcpServers"]["calyx"]["args"] == ["-m", "calyx_mcp.server"]
 
 
 def test_install_preserves_existing_mcp_servers_and_creates_backup(tmp_path):

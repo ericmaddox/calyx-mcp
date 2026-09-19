@@ -222,9 +222,7 @@ def build_calyx_entry(mode: str = "python", schema_type: str = "standard") -> Di
             return {"command": "uvx", "args": ["calyx-mcp"]}
         return {"command": "uvx", "args": ["calyx-mcp"]}
     else:
-        if schema_type == "zed":
-            return {"command": "calyx-mcp", "args": []}
-        return {"command": "calyx-mcp"}
+        return {"command": "python", "args": ["-m", "calyx_mcp.server"]}
 
 
 def install_to_target(target_id: str, mode: str = "python", system: Optional[str] = None,
