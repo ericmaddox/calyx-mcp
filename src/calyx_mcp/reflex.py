@@ -38,16 +38,14 @@ class ReflexDecisionEngine:
         if not isinstance(code, str) or not code.strip():
             raise ValueError("code parameter must be a non-empty string.")
 
-        rep = self.hasher.hash_code(code)
-        active_weights = self.memory.weights[rep.active_indices]
-        valence = float(np.mean(active_weights))
-
-        # Baseline is 1.0 (pristine/neutral)
-        confidence = float(abs(valence - 1.0) / 1.0)
-
         # Select failures before truncation so exact rewards cannot hide a
         # qualifying failure. Public associative queries still return all outcomes.
         matches = await self.memory.query_similarity(code, top_k=5, failures_only=True)
+        # query_similarity refreshes the shared snapshot. Use its weights too.
+        rep = self.hasher.hash_code(code)
+        active_weights = self.memory.weights[rep.active_indices]
+        valence = float(np.mean(active_weights))
+        confidence = float(abs(valence - 1.0) / 1.0)
         past_bug_match = 0.0
         bug_reason = None
         

@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-78%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-87%20passed-brightgreen.svg)](tests/)
 [![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
@@ -296,13 +296,13 @@ To ensure AI coding agents consistently leverage Calyx before applying code chan
 
 ## Running Tests
 
-Execute the 78-test suite:
+Execute the 87-test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Results (78 / 78 Passing)
+### Test Suite Results (87 / 87 Passing)
 
 | Test Suite | Scope & Invariants Tested | Test Count | Status |
 | :--- | :--- | :---: | :---: |
@@ -313,6 +313,7 @@ python -m pytest tests/ -v
 | **`tests/unit/test_memory.py`** | Dopaminergic PAM reward / PPL1 punishment updates, synaptic weight bounds $[0.0, 5.0]$ | 2 | **PASSED** |
 | **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 1 | **PASSED** |
 | **`tests/unit/test_installer.py`** | Multi-OS paths, safe JSON merging, aliases, backup creation, Zed context_servers, interpreter resolution | 10 | **PASSED** |
+| **`tests/unit/test_installer_regressions.py`** | JSONC string preservation, malformed-input rejection, JSONC discovery, native Cursor paths | 4 | **PASSED** |
 | **`tests/test_security_hardening.py`** | Deserialization guards (`allow_pickle=False`), NaN/Inf recovery, payload length bounds, `.orig.bak` preservation, JSONC comments | 6 | **PASSED** |
 | **`tests/e2e/test_mcp_api_hardening.py`** | Input validation, parameter clamping, aliases (`query`, `code`), compact mode, `-32601` method errors, resources read/list, ping | 7 | **PASSED** |
 | **`tests/e2e/test_concurrency_stress.py`** | Async lock correctness and state integrity under 50 concurrent agent coroutines | 1 | **PASSED** |
@@ -321,14 +322,17 @@ python -m pytest tests/ -v
 | **`tests/e2e/test_mcp_stdio.py`** | End-to-end MCP JSON-RPC 2.0 stdio initialization, tool listing, and tool dispatch | 1 | **PASSED** |
 | **`tests/e2e/test_cli_installer.py`** | CLI subcommands: `calyx-mcp --help`, `calyx-mcp install --status`, and `calyx-mcp init` | 3 | **PASSED** |
 | **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across instances | 1 | **PASSED** |
+| **`tests/integration/test_shared_storage.py`** | Custom filenames, exact weight shape, stale and concurrent process writes, reader refresh and reset | 5 | **PASSED** |
 | **`tests/e2e/test_release_followups.py`** | Hidden-failure recall across insertion orders, disk write error propagation, and stdio subprocess restart | 5 | **PASSED** |
 | **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), and mathematical ROI modeling | 3 | **PASSED** |
 | **`tests/unit/test_history_reuse_benchmark.py`** | Synthetic corpus integrity and repair validation, including hardcoded-value rejection | 4 | **PASSED** |
 | **`tests/unit/test_history_usage.py`** | Negative savings, cache accounting, invalid telemetry and ineligible pairs | 3 | **PASSED** |
-| **Total** | **78 passing test cases** | **78** | **100% PASS** |
+| **Total** | **87 passing test cases** | **87** | **100% PASS** |
 
 > [!NOTE]
 > **Persistence & Error Handling**: Synaptic weights and associative records persist locally in `~/.calyx/`. File writes use atomic replacements (`.tmp` to target). In the event of an I/O or filesystem error during disk persistence, an `OSError` is raised and propagated to the MCP caller with actionable diagnostics rather than falsely acknowledging successful recording.
+>
+> **Shared Storage**: Cooperating clients serialize reload/update/save operations with an OS file lock. Queries refresh their snapshot so another client's writes and resets are visible. All clients sharing a directory must use a version with this locking behavior; older clients do not participate. Each file replacement is atomic, but the two-file format is not a crash-atomic transaction. A failed write can still leave partial state, as reported by the persistence error. These reads now include filesystem work; the historical in-memory latency measurements above are not a benchmark of shared-store reads.
 >
 > **Reflex Evaluation Invariant**: The reflex engine inspects qualifying failure records ($\ge 0.65$ similarity) before candidate truncation, ensuring previously identified bug patterns reliably trigger the `avoid` reflex even if multiple subsequent successes have been recorded for related code. Ordinary associative memory queries continue to return the nearest records across all outcomes.
 
