@@ -7,9 +7,10 @@ import os
 import json
 import asyncio
 import logging
+from contextlib import contextmanager
 import numpy as np
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, Iterator, List, Optional, Tuple
 from datetime import datetime
 
 from .config import PlasticityConfig, StorageConfig
@@ -67,16 +68,47 @@ class MushroomBodyMemory:
 
     def load_from_disk(self) -> bool:
         """Load synaptic weights and memory metadata from disk with strict deserialization guards"""
+        with self._disk_lock():
+            return self._load_from_disk()
+
+    @contextmanager
+    def _disk_lock(self) -> Iterator[None]:
+        """Serialize cooperating processes; the OS releases locks on process exit."""
+        self._ensure_secure_dir(self.storage_dir)
+        lock_path = self.storage_dir / ".calyx.lock"
+        descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+        with os.fdopen(descriptor, "r+b") as lock_file:
+            self._ensure_secure_file(lock_path)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_LOCK, 1)
+                try:
+                    yield
+                finally:
+                    lock_file.seek(0)
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def _load_from_disk(self) -> bool:
+        """Read one snapshot while the caller holds the disk lock."""
+        self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
+        self.records = []
+        self._record_seq = 0
         try:
             if self.weights_path.exists():
-                data = np.load(self.weights_path, allow_pickle=False)
-                if "weights" in data and len(data["weights"]) == self.kenyon_dim:
-                    loaded = data["weights"].astype(np.float32)
-                    if np.isfinite(loaded).all():
-                        self.weights = loaded
-                    else:
-                        logger.warning("Corrupted non-finite weights found in weights file; resetting to baseline.")
-                        self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
+                with np.load(self.weights_path, allow_pickle=False) as data:
+                    if "weights" in data:
+                        loaded = data["weights"].astype(np.float32)
+                        if loaded.shape == (self.kenyon_dim,) and np.isfinite(loaded).all():
+                            self.weights = loaded
+                        else:
+                            logger.warning("Invalid weight shape or non-finite values; resetting to baseline.")
             if self.metadata_path.exists():
                 with open(self.metadata_path, "r", encoding="utf-8") as f:
                     raw_records = json.load(f)
@@ -101,7 +133,15 @@ class MushroomBodyMemory:
             return False
 
     def save_to_disk(self) -> None:
-        """Process-isolated atomic file save to prevent mid-write corruption and collisions"""
+        """Explicitly replace the disk snapshot with this instance's state.
+
+        Use remember/reset for read-modify-write operations shared across clients.
+        """
+        with self._disk_lock():
+            self._save_to_disk()
+
+    def _save_to_disk(self) -> None:
+        """Replace each state file while the caller holds the disk lock."""
         try:
             self._ensure_secure_dir(self.storage_dir)
             self._save_seq += 1
@@ -109,20 +149,20 @@ class MushroomBodyMemory:
             
             # 1. Atomic weights save (.tmp_<pid>_<seq> -> replace)
             tmp_weights = self.storage_dir / f".tmp_{unique_tag}_{self.storage_cfg.weights_filename}"
-            np.savez_compressed(tmp_weights, weights=self.weights)
-            if tmp_weights.exists():
-                self._ensure_secure_file(tmp_weights)
-                tmp_weights.replace(self.weights_path)
-                self._ensure_secure_file(self.weights_path)
+            # A file object prevents NumPy from appending .npz to custom names.
+            with open(tmp_weights, "wb") as f:
+                np.savez_compressed(f, weights=self.weights)
+            self._ensure_secure_file(tmp_weights)
+            tmp_weights.replace(self.weights_path)
+            self._ensure_secure_file(self.weights_path)
                 
             # 2. Atomic metadata save (.tmp_<pid>_<seq> -> replace)
             tmp_meta = self.storage_dir / f".tmp_{unique_tag}_{self.storage_cfg.metadata_filename}"
             with open(tmp_meta, "w", encoding="utf-8") as f:
                 json.dump(self.records[-self.storage_cfg.max_records:], f, indent=2)
-            if tmp_meta.exists():
-                self._ensure_secure_file(tmp_meta)
-                tmp_meta.replace(self.metadata_path)
-                self._ensure_secure_file(self.metadata_path)
+            self._ensure_secure_file(tmp_meta)
+            tmp_meta.replace(self.metadata_path)
+            self._ensure_secure_file(self.metadata_path)
         except Exception as e:
             logger.error(f"Failed to persist Calyx memory to disk: {e}")
             raise OSError(
@@ -140,63 +180,71 @@ class MushroomBodyMemory:
         Applies dopamine reward (+1.0 PAM) or punishment (-1.0 PPL1) to active Kenyon Cell synapses.
         """
         async with self._lock:
-            rep = self.hasher.hash_code(code)
-            lr = self.plasticity_cfg.learning_rate
-            
-            # Apply passive decay towards baseline if enabled
-            if self.plasticity_cfg.enable_weight_decay:
-                self.apply_decay()
+            with self._disk_lock():
+                self._load_from_disk()
+                return self._remember(code, outcome, error_message, tags)
 
-            # Determine valence direction
-            if outcome.lower() in ["success", "passed", "reward"]:
-                valence_delta = lr * self.plasticity_cfg.reward_multiplier
-                valence_type = "reward"
-            else:
-                valence_delta = -lr * self.plasticity_cfg.punishment_multiplier
-                valence_type = "punishment"
+    def _remember(self, code: str, outcome: str, error_message: Optional[str],
+                  tags: Optional[List[str]]) -> Dict[str, Any]:
+        """Apply and persist one outcome while both instance and disk locks are held."""
+        rep = self.hasher.hash_code(code)
+        lr = self.plasticity_cfg.learning_rate
 
-            # Apply plastic update to active Kenyon synapses: W_i += delta
-            self.weights[rep.active_indices] += valence_delta
-            
-            # Clamp weights to bounded range [min_weight, max_weight]
-            self.weights = np.clip(self.weights, self.plasticity_cfg.min_weight, self.plasticity_cfg.max_weight)
+        # Apply passive decay towards baseline if enabled
+        if self.plasticity_cfg.enable_weight_decay:
+            self.apply_decay()
 
-            # Record associative entry for future nearest-neighbor lookup
-            self._record_seq += 1
-            record = {
-                "id": f"rec_{self._record_seq}",
-                "timestamp": datetime.now().isoformat(),
-                "outcome": outcome,
-                "valence_type": valence_type,
-                "error_message": error_message or "",
-                "tags": tags or [],
-                "active_indices": rep.active_indices.tolist(),
-                "code_snippet": code[:200]
-            }
-            self.records.append(record)
-            
-            # Maintain bounded memory capacity
-            if len(self.records) > self.storage_cfg.max_records:
-                self.records = self.records[-self.storage_cfg.max_records:]
+        # Determine valence direction
+        if outcome.lower() in ["success", "passed", "reward"]:
+            valence_delta = lr * self.plasticity_cfg.reward_multiplier
+            valence_type = "reward"
+        else:
+            valence_delta = -lr * self.plasticity_cfg.punishment_multiplier
+            valence_type = "punishment"
 
-            self.save_to_disk()
+        # Apply plastic update to active Kenyon synapses: W_i += delta
+        self.weights[rep.active_indices] += valence_delta
 
-            # Compute current pattern valence
-            current_valence = float(np.mean(self.weights[rep.active_indices]))
+        # Clamp weights to bounded range [min_weight, max_weight]
+        self.weights = np.clip(self.weights, self.plasticity_cfg.min_weight, self.plasticity_cfg.max_weight)
 
-            return {
-                "status": "recorded",
-                "outcome": outcome,
-                "valence_type": valence_type,
-                "pattern_valence": round(current_valence, 4),
-                "active_synapses_updated": len(rep.active_indices),
-                "total_memories_stored": len(self.records)
-            }
+        # Record associative entry for future nearest-neighbor lookup
+        self._record_seq += 1
+        record = {
+            "id": f"rec_{self._record_seq}",
+            "timestamp": datetime.now().isoformat(),
+            "outcome": outcome,
+            "valence_type": valence_type,
+            "error_message": error_message or "",
+            "tags": tags or [],
+            "active_indices": rep.active_indices.tolist(),
+            "code_snippet": code[:200]
+        }
+        self.records.append(record)
+
+        # Maintain bounded memory capacity
+        if len(self.records) > self.storage_cfg.max_records:
+            self.records = self.records[-self.storage_cfg.max_records:]
+
+        self._save_to_disk()
+
+        # Compute current pattern valence
+        current_valence = float(np.mean(self.weights[rep.active_indices]))
+
+        return {
+            "status": "recorded",
+            "outcome": outcome,
+            "valence_type": valence_type,
+            "pattern_valence": round(current_valence, 4),
+            "active_synapses_updated": len(rep.active_indices),
+            "total_memories_stored": len(self.records)
+        }
 
     async def query_similarity(self, query_code: str, top_k: int = 5,
                                *, failures_only: bool = False) -> List[Dict[str, Any]]:
         """Find nearest records, optionally filtering failures before truncation."""
         async with self._lock:
+            self.load_from_disk()
             if not self.records:
                 return []
             
@@ -228,6 +276,7 @@ class MushroomBodyMemory:
     async def get_state_metrics(self) -> Dict[str, Any]:
         """Inspect synaptic weight distribution and health metrics"""
         async with self._lock:
+            self.load_from_disk()
             return {
                 "total_memories_stored": len(self.records),
                 "total_kenyon_cells": self.kenyon_dim,
@@ -243,18 +292,25 @@ class MushroomBodyMemory:
     async def reset(self, backup: bool = True) -> Dict[str, Any]:
         """Reset weights to baseline"""
         async with self._lock:
-            backup_file = None
-            if backup and self.weights_path.exists():
-                backup_path = self.storage_dir / f"backup_{int(datetime.now().timestamp())}.npz"
-                np.savez_compressed(backup_path, weights=self.weights)
-                self._ensure_secure_file(backup_path)
-                backup_file = str(backup_path)
-            
-            self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
-            self.records = []
-            self.save_to_disk()
-            return {
-                "status": "reset_complete",
-                "backup_created": backup_file is not None,
-                "backup_path": backup_file
-            }
+            with self._disk_lock():
+                self._load_from_disk()
+                return self._reset(backup)
+
+    def _reset(self, backup: bool) -> Dict[str, Any]:
+        """Back up and reset the latest snapshot while both locks are held."""
+        backup_file = None
+        if backup and self.weights_path.exists():
+            backup_path = self.storage_dir / f"backup_{int(datetime.now().timestamp())}.npz"
+            np.savez_compressed(backup_path, weights=self.weights)
+            self._ensure_secure_file(backup_path)
+            backup_file = str(backup_path)
+
+        self.weights = np.full(self.kenyon_dim, self.plasticity_cfg.baseline_weight, dtype=np.float32)
+        self.records = []
+        self._record_seq = 0
+        self._save_to_disk()
+        return {
+            "status": "reset_complete",
+            "backup_created": backup_file is not None,
+            "backup_path": backup_file
+        }

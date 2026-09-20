@@ -6,7 +6,6 @@ Google Antigravity, Windsurf, Roo Code, Cline, and Zed.
 
 import os
 import sys
-import re
 import json
 import shutil
 import platform
@@ -71,7 +70,7 @@ def get_system_paths(system: Optional[str] = None, base_dir: Optional[Path] = No
             },
             "cursor": {
                 "name": "Cursor",
-                "path": appdata / "Cursor" / "User" / "globalStorage" / "saoudrizwan.claude-dev" / "settings" / "cline_mcp_settings.json",
+                "path": home / ".cursor" / "mcp.json",
                 "schema": "standard"
             },
             "antigravity": {
@@ -111,7 +110,7 @@ def get_system_paths(system: Optional[str] = None, base_dir: Optional[Path] = No
             },
             "cursor": {
                 "name": "Cursor",
-                "path": app_support / "Cursor" / "User" / "globalStorage" / "saoudrizwan.claude-dev" / "settings" / "cline_mcp_settings.json",
+                "path": home / ".cursor" / "mcp.json",
                 "schema": "standard"
             },
             "antigravity": {
@@ -151,7 +150,7 @@ def get_system_paths(system: Optional[str] = None, base_dir: Optional[Path] = No
             },
             "cursor": {
                 "name": "Cursor",
-                "path": config_dir / "Cursor" / "User" / "globalStorage" / "saoudrizwan.claude-dev" / "settings" / "cline_mcp_settings.json",
+                "path": home / ".cursor" / "mcp.json",
                 "schema": "standard"
             },
             "antigravity": {
@@ -182,6 +181,48 @@ def get_system_paths(system: Optional[str] = None, base_dir: Optional[Path] = No
         }
 
 
+def _parse_config(text: str) -> Dict[str, Any]:
+    """Decode JSONC without treating quoted comment/comma markers as syntax."""
+    decoder = json.JSONDecoder()
+    tokens = []
+    index = 0
+    while index < len(text):
+        if text[index] == '"':
+            # Let the JSON decoder handle escaped quotes, backslashes and Unicode.
+            _, end = decoder.raw_decode(text, index)
+            tokens.append(text[index:end])
+            index = end
+        elif text.startswith("//", index):
+            end = index + 2
+            while end < len(text) and text[end] not in "\r\n":
+                end += 1
+            tokens.append(" ")
+            index = end
+        elif text.startswith("/*", index):
+            end = text.find("*/", index + 2)
+            if end == -1:
+                raise ValueError("Unterminated block comment")
+            # Whitespace prevents adjacent numbers/keywords from being joined.
+            tokens.append(" ")
+            index = end + 2
+        else:
+            tokens.append(text[index])
+            index += 1
+
+    significant = [i for i, token in enumerate(tokens) if token not in " \t\r\n"]
+    for position, index in enumerate(significant):
+        if tokens[index] != "," or position == 0 or position + 1 == len(significant):
+            continue
+        previous = tokens[significant[position - 1]]
+        following = tokens[significant[position + 1]]
+        if following in ("}", "]") and previous not in ("{", "[", ",", ":"):
+            tokens[index] = " "
+    data = json.loads("".join(tokens))
+    if not isinstance(data, dict):
+        raise ValueError("IDE configuration must be a JSON object")
+    return data
+
+
 def inspect_targets(system: Optional[str] = None, base_dir: Optional[Path] = None) -> List[TargetInfo]:
     """Inspects all supported targets on the host and checks their configuration state."""
     specs = get_system_paths(system, base_dir)
@@ -194,8 +235,7 @@ def inspect_targets(system: Optional[str] = None, base_dir: Optional[Path] = Non
 
         if p.exists():
             try:
-                with open(p, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+                data = _parse_config(p.read_text(encoding="utf-8"))
                 if info["schema"] == "zed":
                     configured = "calyx" in data.get("context_servers", {})
                 else:
@@ -288,15 +328,9 @@ def install_to_target(target_id: str, mode: str = "python", system: Optional[str
 
             raw_text = path.read_text(encoding="utf-8")
             try:
-                data = json.loads(raw_text)
-            except json.JSONDecodeError:
-                # Attempt to parse JSON with comments / trailing commas stripped (e.g. Zed / VS Code JSONC)
-                clean_text = re.sub(r'//.*?$|/\*.*?\*/', '', raw_text, flags=re.MULTILINE | re.DOTALL)
-                clean_text = re.sub(r',\s*([\]}])', r'\1', clean_text)
-                try:
-                    data = json.loads(clean_text)
-                except Exception as e:
-                    return False, f"Existing config at {path} is invalid JSON: {e}"
+                data = _parse_config(raw_text)
+            except ValueError as e:
+                return False, f"Existing config at {path} is invalid JSON: {e}"
 
         entry = build_calyx_entry(mode=mode, schema_type=schema, python_path=python_path)
 
