@@ -22,7 +22,7 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 * **The Problem**: AI coding agents repeatedly consume thousands of LLM prompt tokens and multi-second roundtrip latency diagnosing recurring bugs, antipatterns, and project constraints.
 * **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity to give agents instant, zero-overhead associative memory without internal LLM calls.
 * **The Proof (Benchmark)**:
-  * **Latency**: **2.013 ms (p50) / 3.711 ms (p99)** real-path end-to-end (**0.217 ms (p50)** in-memory vs ~1,450 ms LLM API roundtrip — **>700x faster**)
+  * **Latency**: **0.217 ms (p50) / 0.533 ms (p99)** in-memory (**>6,600x faster**), **2.013 ms (p50) / 3.711 ms (p99)** real-path end-to-end (**>700x faster**) vs ~1,450 ms LLM API roundtrip
   * **Token Cost**: **0 tokens** (100% local Mushroom Body execution; zero LLM inference calls)
 
 ---
@@ -33,7 +33,7 @@ In insect neuroanatomy, the **Calyx** (plural: *calyces*) is the primary input n
 
 It is inside the calyx that dense, low-dimensional sensory signals undergo high-dimensional sparse expansion, turning raw input into a distinct neural fingerprint that dopaminergic circuits can reinforce or suppress.
 
-The name **Calyx** was chosen because this MCP server functions as that exact input and associative expansion layer for AI coding agents: converting raw code AST tokens into high-dimensional, ultra-sparse Kenyon Cell representations that drive fast reflexes (p50: 2.013 ms / p99: 3.711 ms real-path; p50: 0.217 ms in-memory), pattern recognition, and persistent synaptic memory without LLM inference costs.
+The name **Calyx** was chosen because this MCP server functions as that exact input and associative expansion layer for AI coding agents: converting raw code AST tokens into high-dimensional, ultra-sparse Kenyon Cell representations that drive fast reflexes (in-memory: p50 0.217 ms / p99 0.533 ms; real-path: p50 2.013 ms / p99 3.711 ms), pattern recognition, and persistent synaptic memory without LLM inference costs.
 
 ---
 
@@ -126,7 +126,7 @@ Traditional LLM Querying Loop:
   * Debugging Loop:     ~2400 tokens per repeated bug
 
 Calyx Mushroom Body Reflex:
-  * Latency per review: 2.013 ms p50 real-path / 0.217 ms in-memory (>700x real-path speedup)
+  * Latency per review: 2.013 ms p50 real-path / 0.217 ms in-memory (>700x real-path, >6,600x in-memory speedup)
   * Token Cost:         0 tokens (Local Fly-LSH sparse projection)
   * Token Efficiency:   100% local execution (Zero LLM inference overhead)
 
