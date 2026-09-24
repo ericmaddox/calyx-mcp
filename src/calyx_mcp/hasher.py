@@ -79,10 +79,15 @@ class FlyLSHHasher:
             else:
                 tokens.append((f"sym:{w_lower}", 1.5))
 
-        # 3. Word Bigrams for structural syntax matching
-        for i in range(len(clean_words) - 1):
-            bigram = f"bi:{clean_words[i]}_{clean_words[i+1]}"
-            tokens.append((bigram, 1.2))
+        # 3. Word N-grams for structural syntax matching (honoring ngram_min and ngram_max)
+        for n in range(self.config.ngram_min, self.config.ngram_max + 1):
+            if n < 2:
+                continue
+            weight = 1.2 if n == 2 else 0.8
+            prefix = "bi" if n == 2 else f"ng{n}"
+            for i in range(len(clean_words) - n + 1):
+                ngram = f"{prefix}:" + "_".join(clean_words[i:i + n])
+                tokens.append((ngram, weight))
 
         if not tokens:
             tokens = [("empty:code", 1.0)]
@@ -133,7 +138,10 @@ class FlyLSHHasher:
 
     def calculate_hamming_similarity(self, rep_a: KenyonSparseRepresentation, rep_b: KenyonSparseRepresentation) -> float:
         """
-        Calculates Kenyon cell overlap ratio between two representations.
+        Calculates Kenyon cell overlap ratio between two representations (|A ∩ B| / min(|A|, |B|)).
+
+        NOTE: This is a diagnostic and testing utility. Production associative retrieval
+        in MushroomBodyMemory.query_similarity uses symmetric Jaccard similarity (|A ∩ B| / |A ∪ B|).
         Returns value in [0.0, 1.0].
         """
         set_a = set(rep_a.active_indices.tolist())

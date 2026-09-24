@@ -37,7 +37,8 @@ class CalyxMCPServer:
         # Initialize Memory and Reflex Engine
         self.memory = MushroomBodyMemory(
             plasticity_cfg=self.config.plasticity,
-            storage_cfg=self.config.storage
+            storage_cfg=self.config.storage,
+            hasher_cfg=self.config.hasher
         )
         self.reflex_engine = ReflexDecisionEngine(self.memory, self.config.reflex)
 

@@ -59,11 +59,14 @@ async def test_loss_asymmetry_boundaries(memory, reflex_engine):
 
 
 @pytest.mark.asyncio
-async def test_contradiction_guard_with_warning(memory, reflex_engine):
+async def test_contradiction_guard_with_warning(memory):
     """
-    When code has positive valence (> 1.15) but >= 50% similarity with a past failure,
+    When code has positive valence (> 1.15) but >= contradiction_guard_similarity with a past failure,
     the contradiction guard returns 'neutral' with a warning instead of falsely claiming 'safe'.
     """
+    from calyx_mcp.config import ReflexConfig
+
+    engine = ReflexDecisionEngine(memory, reflex_cfg=ReflexConfig(contradiction_guard_similarity=0.40))
     bug_code = "def query_db(uid): return db.find(f'SELECT * FROM u WHERE id={uid}')"
     fix_code = "def query_db(uid): return db.find('SELECT * FROM u WHERE id=%s', uid)"
 
@@ -72,8 +75,8 @@ async def test_contradiction_guard_with_warning(memory, reflex_engine):
     for _ in range(3):
         await memory.remember(fix_code, outcome="success")
 
-    res = await reflex_engine.evaluate_reflex(fix_code)
-    # Because fix shares majority of tokens with bug, contradiction guard triggers neutral
+    res = await engine.evaluate_reflex(fix_code)
+    # Because fix shares similarity with bug, contradiction guard triggers neutral
     assert res.status == "neutral"
     assert res.warning is not None
     assert "Mixed history detected" in res.warning

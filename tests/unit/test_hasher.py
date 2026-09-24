@@ -73,3 +73,29 @@ def test_semantic_hamming_proximity(hasher):
     # Similar code must have high overlap (> 50%), unrelated must have near-zero overlap (< 25%)
     assert sim_ab > 0.50
     assert sim_ac < 0.25
+
+
+def test_hasher_config_honored():
+    from calyx_mcp.config import HasherConfig
+
+    custom_cfg = HasherConfig(
+        dense_dim=512,
+        kenyon_cells=1024,
+        active_k=50,
+        seed=1337,
+        ngram_min=2,
+        ngram_max=3,
+    )
+    custom_hasher = FlyLSHHasher(config=custom_cfg)
+
+    assert custom_hasher.dense_dim == 512
+    assert custom_hasher.kenyon_cells == 1024
+    assert custom_hasher.active_k == 50
+    assert custom_hasher.seed == 1337
+    assert custom_hasher.projection_matrix.shape == (1024, 512)
+
+    code = "def sample(x): return x + 1"
+    rep = custom_hasher.hash_code(code)
+    assert len(rep.binary_vector) == 1024
+    assert len(rep.active_indices) == 50
+

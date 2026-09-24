@@ -11,9 +11,10 @@ from contextlib import contextmanager
 import numpy as np
 from pathlib import Path
 from typing import Dict, Any, Iterator, List, Optional, Tuple
-from datetime import datetime
+import shutil
+from datetime import datetime, timezone
 
-from .config import PlasticityConfig, StorageConfig
+from .config import PlasticityConfig, StorageConfig, HasherConfig
 from .hasher import FlyLSHHasher, KenyonSparseRepresentation
 
 logger = logging.getLogger("calyx_mcp.memory")
@@ -24,10 +25,14 @@ class MushroomBodyMemory:
     Manages Kenyon Cell -> MBON synaptic connection weights and associative memory metadata.
     """
 
-    def __init__(self, plasticity_cfg: Optional[PlasticityConfig] = None, storage_cfg: Optional[StorageConfig] = None):
+    def __init__(self,
+                 plasticity_cfg: Optional[PlasticityConfig] = None,
+                 storage_cfg: Optional[StorageConfig] = None,
+                 hasher_cfg: Optional[HasherConfig] = None):
         self.plasticity_cfg = plasticity_cfg or PlasticityConfig()
         self.storage_cfg = storage_cfg or StorageConfig()
-        self.hasher = FlyLSHHasher()
+        self.hasher_cfg = hasher_cfg or HasherConfig()
+        self.hasher = FlyLSHHasher(config=self.hasher_cfg)
         self.kenyon_dim = self.hasher.kenyon_cells
 
         # Synaptic Weights Array: W in R^D (initialized to baseline 1.0)
@@ -43,6 +48,7 @@ class MushroomBodyMemory:
         self._ensure_secure_dir(self.storage_dir)
         self.weights_path = self.storage_dir / self.storage_cfg.weights_filename
         self.metadata_path = self.storage_dir / self.storage_cfg.metadata_filename
+        self.hasher_config_path = self.storage_dir / "hasher_config.json"
         self._save_seq = 0
         
         self.load_from_disk()
@@ -101,6 +107,30 @@ class MushroomBodyMemory:
         self.records = []
         self._record_seq = 0
         try:
+            # Check for hasher config mismatch against persisted state
+            if self.hasher_config_path.exists():
+                try:
+                    with open(self.hasher_config_path, "r", encoding="utf-8") as hf:
+                        saved_hcfg = json.load(hf)
+                    if (saved_hcfg.get("dense_dim") != self.hasher_cfg.dense_dim or
+                        saved_hcfg.get("kenyon_cells") != self.hasher_cfg.kenyon_cells or
+                        saved_hcfg.get("active_k") != self.hasher_cfg.active_k or
+                        saved_hcfg.get("seed") != self.hasher_cfg.seed):
+                        logger.warning(
+                            "Hasher configuration mismatch with persisted state; "
+                            "existing weights are invalidated. Resetting with backup."
+                        )
+                        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+                        if self.weights_path.exists():
+                            shutil.copy2(self.weights_path, self.storage_dir / f"{self.weights_path.name}.bak_{ts}")
+                        if self.metadata_path.exists():
+                            shutil.copy2(self.metadata_path, self.storage_dir / f"{self.metadata_path.name}.bak_{ts}")
+                        shutil.copy2(self.hasher_config_path, self.storage_dir / f"hasher_config.json.bak_{ts}")
+                        self._save_to_disk()
+                        return True
+                except Exception as h_err:
+                    logger.warning(f"Error checking hasher config signature: {h_err}")
+
             if self.weights_path.exists():
                 with np.load(self.weights_path, allow_pickle=False) as data:
                     if "weights" in data:
@@ -163,6 +193,19 @@ class MushroomBodyMemory:
             self._ensure_secure_file(tmp_meta)
             tmp_meta.replace(self.metadata_path)
             self._ensure_secure_file(self.metadata_path)
+
+            # 3. Atomic hasher config save (.tmp_<pid>_<seq> -> replace)
+            tmp_hcfg = self.storage_dir / f".tmp_{unique_tag}_hasher_config.json"
+            with open(tmp_hcfg, "w", encoding="utf-8") as f:
+                json.dump({
+                    "dense_dim": self.hasher_cfg.dense_dim,
+                    "kenyon_cells": self.hasher_cfg.kenyon_cells,
+                    "active_k": self.hasher_cfg.active_k,
+                    "seed": self.hasher_cfg.seed,
+                }, f, indent=2)
+            self._ensure_secure_file(tmp_hcfg)
+            tmp_hcfg.replace(self.hasher_config_path)
+            self._ensure_secure_file(self.hasher_config_path)
         except Exception as e:
             logger.error(f"Failed to persist Calyx memory to disk: {e}")
             raise OSError(
