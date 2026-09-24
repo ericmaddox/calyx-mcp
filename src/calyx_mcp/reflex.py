@@ -9,6 +9,7 @@ import numpy as np
 
 from .hasher import FlyLSHHasher
 from .memory import MushroomBodyMemory
+from .config import ReflexConfig
 
 
 @dataclass
@@ -27,9 +28,10 @@ class ReflexDecisionEngine:
     Evaluates proposed code patterns and triggers immediate behavioral reflexes.
     """
 
-    def __init__(self, memory: MushroomBodyMemory):
+    def __init__(self, memory: MushroomBodyMemory, reflex_cfg: Optional[ReflexConfig] = None):
         self.memory = memory
         self.hasher = memory.hasher
+        self.reflex_cfg = reflex_cfg or ReflexConfig()
 
     async def evaluate_reflex(self, code: str, context: Optional[str] = None) -> ReflexOutcome:
         """
@@ -50,18 +52,18 @@ class ReflexDecisionEngine:
         bug_reason = None
         
         for m in matches:
-            if m["outcome"].lower() in ["failure", "failed", "bug", "error"] and m["similarity"] > 0.35:
+            if m["outcome"].lower() in ["failure", "failed", "bug", "error"] and m["similarity"] > self.reflex_cfg.bug_reason_floor_similarity:
                 if m["similarity"] > past_bug_match:
                     past_bug_match = m["similarity"]
                     bug_reason = m.get("error_message") or "Previously caused a unit test failure or runtime bug."
 
         # Decision Thresholds
-        # 1. Failure Override: Any matching failure record (>= 65%) or negative valence triggers avoid
-        if past_bug_match >= 0.65 or valence < 0.85:
+        # 1. Failure Override: Any matching failure record or negative valence triggers avoid
+        if past_bug_match >= self.reflex_cfg.failure_override_similarity or valence < self.reflex_cfg.avoid_valence_floor:
             warning_msg = (
                 f"High resemblance ({int(past_bug_match*100)}%) to a previously punished bug pattern: '{bug_reason}'"
-                if past_bug_match >= 0.65 and bug_reason else
-                f"Negative synaptic valence ({valence:.2f} < 0.85). Pattern associated with past failures."
+                if past_bug_match >= self.reflex_cfg.failure_override_similarity and bug_reason else
+                f"Negative synaptic valence ({valence:.2f} < {self.reflex_cfg.avoid_valence_floor:.2f}). Pattern associated with past failures."
             )
             return ReflexOutcome(
                 status="avoid",
@@ -72,8 +74,8 @@ class ReflexDecisionEngine:
                 similarity_with_past_bugs=round(past_bug_match, 4)
             )
             
-        # 2. Contradiction Guard: If valence > 1.15 but there is moderate bug resemblance (>= 50%), return neutral
-        elif valence > 1.15 and past_bug_match >= 0.50:
+        # 2. Contradiction Guard: If valence > safe ceiling but there is moderate bug resemblance, return neutral
+        elif valence > self.reflex_cfg.safe_valence_ceiling and past_bug_match >= self.reflex_cfg.contradiction_guard_similarity:
             return ReflexOutcome(
                 status="neutral",
                 valence=round(valence, 4),
@@ -83,7 +85,7 @@ class ReflexDecisionEngine:
                 similarity_with_past_bugs=round(past_bug_match, 4)
             )
             
-        elif valence > 1.15:
+        elif valence > self.reflex_cfg.safe_valence_ceiling:
             return ReflexOutcome(
                 status="safe",
                 valence=round(valence, 4),

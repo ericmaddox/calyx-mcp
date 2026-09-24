@@ -60,12 +60,23 @@ class ServerConfig:
 
 
 @dataclass
+class ReflexConfig:
+    """Reflex Decision Engine Thresholds"""
+    avoid_valence_floor: float = 0.85
+    safe_valence_ceiling: float = 1.15
+    failure_override_similarity: float = 0.65
+    contradiction_guard_similarity: float = 0.50
+    bug_reason_floor_similarity: float = 0.35
+
+
+@dataclass
 class CalyxConfig:
     """Master Configuration"""
     hasher: HasherConfig = field(default_factory=HasherConfig)
     plasticity: PlasticityConfig = field(default_factory=PlasticityConfig)
     storage: StorageConfig = field(default_factory=StorageConfig)
     server: ServerConfig = field(default_factory=ServerConfig)
+    reflex: ReflexConfig = field(default_factory=ReflexConfig)
 
     @classmethod
     def from_env(cls) -> "CalyxConfig":
@@ -100,6 +111,10 @@ class CalyxConfig:
             for k, v in data["server"].items():
                 if hasattr(cfg.server, k):
                     setattr(cfg.server, k, v)
+        if "reflex" in data:
+            for k, v in data["reflex"].items():
+                if hasattr(cfg.reflex, k):
+                    setattr(cfg.reflex, k, v)
         return cfg
 
 

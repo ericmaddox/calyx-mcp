@@ -39,7 +39,7 @@ class CalyxMCPServer:
             plasticity_cfg=self.config.plasticity,
             storage_cfg=self.config.storage
         )
-        self.reflex_engine = ReflexDecisionEngine(self.memory)
+        self.reflex_engine = ReflexDecisionEngine(self.memory, self.config.reflex)
 
     def _setup_logging(self) -> logging.Logger:
         logger = logging.getLogger("calyx_mcp")
