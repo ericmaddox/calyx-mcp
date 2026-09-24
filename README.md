@@ -146,22 +146,36 @@ Calyx Mushroom Body Reflex:
 
 | Metric | Traditional LLM Inspection | Calyx Mushroom Body | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Latency** | ~1,450 ms | **0.400 ms** | **3,628x faster** |
-| **Token Consumption** | 650 - 2,400 tokens per loop | **0 tokens** (Local Fly-LSH) | **100% local execution** (Zero LLM calls) |
+| **Latency (In-Memory)** | ~1,450 ms | **0.217 ms (p50)** | **> 6,600x faster** |
+| **Latency (Real-Path End-to-End)** | ~1,450 ms | **2.013 ms (p50)** | **> 700x faster** (Includes cross-process lock & disk snapshot sync) |
+| **Throughput** | 0.5 - 2 req/s | **452 req/s (real-path) / 4,189 req/s (in-memory)** | Zero external network calls |
+| **Token Consumption** | 650 - 2,400 tokens per loop | **0 tokens** (Local Fly-LSH) | **100% local execution** |
 | **Memory Footprint** | External API | **< 15 MB RAM** | Local execution |
 | **Pattern Match Type** | Full prompt parsing | **Sparse Kenyon Cell overlap** | Deterministic associative recall |
 
+> [!NOTE]
+> Latency figures are measured across 1,000 iterations using `scripts/bench_reflex.py`. Real-path measurements include full MCP request parsing, inter-process file locking (`msvcrt`/`fcntl`), shared disk state verification, and Kenyon cell projection.
+
 ---
 
-### Real-World Bug & Vulnerability Verification
+### Empirical Generalization & Near-Duplicate Verification
 
-Calyx was benchmarked against real-world vulnerability and resource management patterns to test generalization across altered variable names, structural shifts, and function signatures:
+Calyx operates as a **deterministic, zero-token associative code memory**. It guarantees that exact bug patterns and near-duplicate regressions caught in previous runs are instantly avoided, while achieving **0.00% false positives** on unrelated code.
 
-| Scenario | Anti-Pattern Trained | Novel Variant Evaluated | Reflex Outcome | Latency | Tokens |
-| :--- | :--- | :--- | :---: | :---: | :---: |
-| **SQL Injection (CWE-89)** | `f"SELECT ... WHERE user = '{name}'"` | Concatenation in `authenticate_admin()` | **AVOID** (Valence: 0.775) | 0.630 ms | **0 tokens** |
-| **Resource Descriptor Leak** | `open()` in loop without context manager | `socket.create_connection()` unclosed | **AVOID** (Valence: 0.550) | 0.662 ms | **0 tokens** |
-| **CPU Spinlock Lockup** | `while True: poll()` without delay | Unbounded message loop polling | **AVOID** (Valence: 0.775) | 0.400 ms | **0 tokens** |
+In a pre-registered benchmark across 60 multi-language bug-fix pairs (180 paraphrased variants, 60 fixes, and 120 negative controls in Python, JS, Go, Rust, and SQL):
+
+| Evaluation Dimension | Metric Measured | Result | Details |
+| :--- | :--- | :---: | :--- |
+| **Unrelated Negative Controls** | False-Positive Rate | **0.00% (0/120)** | Zero false alarms on safe, unrelated code |
+| **Fixed Code Contradiction Guard** | False-Positive Rate | **5.00% (3/60)** | Contradiction guard protects fixes from false `avoid` flags |
+| **Exact & Near-Duplicate Recall** | Reintroduction Avoid Rate | **100.0%** | Full prevention of exact / minor-edit bug reintroductions |
+| **Paraphrased Variant Generalization** | Standard Hasher Avoid Rate | **4.44% (8/180)** | Renamed/restructured code alters local token n-grams |
+| **Paraphrased Variant Generalization** | Abstracted Tokenizer Avoid Rate | **34.44% (62/180)** | 8x recall improvement via role-placeholder tokenization |
+
+*See [`benchmarks/2026-09-eval/`](benchmarks/2026-09-eval/) for complete JSONL test records, pre-registered targets, methodology, and reproduction scripts (`scripts/eval_generalization.py`).*
+
+> [!IMPORTANT]
+> **Loss Asymmetry by Design:** Calyx implements biologically inspired loss aversion. A single punished failure immediately triggers an `avoid` reflex (one-shot aversive conditioning) to shield against regressions. Conversely, achieving a confirmed `safe` reflex requires multiple verified successes (>= 2 rewards) to avoid premature complacency on unverified edge cases.
 
 ## MCP Tools Reference
 
