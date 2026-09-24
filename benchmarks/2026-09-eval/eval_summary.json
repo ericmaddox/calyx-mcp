@@ -1,0 +1,237 @@
+{
+  "dataset": "tests\\eval\\generalization_cases.jsonl",
+  "total_cases": 60,
+  "total_variants": 180,
+  "total_unrelated": 120,
+  "variant_recall": 0.044444444444444446,
+  "fixed_fpr": 0.05,
+  "unrelated_fpr": 0.0,
+  "targets": {
+    "variant_recall_min": 0.8,
+    "fixed_fpr_max": 0.1,
+    "unrelated_fpr_max": 0.05
+  },
+  "by_variant_type": {
+    "rename": {
+      "total": 60,
+      "avoid": 0
+    },
+    "reorder": {
+      "total": 60,
+      "avoid": 8
+    },
+    "restructure": {
+      "total": 60,
+      "avoid": 0
+    }
+  },
+  "by_lang": {
+    "python": {
+      "total_v": 60,
+      "avoid_v": 2,
+      "total_fix": 20,
+      "avoid_fix": 1
+    },
+    "javascript": {
+      "total_v": 45,
+      "avoid_v": 2,
+      "total_fix": 15,
+      "avoid_fix": 1
+    },
+    "go": {
+      "total_v": 39,
+      "avoid_v": 2,
+      "total_fix": 13,
+      "avoid_fix": 1
+    },
+    "rust": {
+      "total_v": 33,
+      "avoid_v": 2,
+      "total_fix": 11,
+      "avoid_fix": 0
+    },
+    "sql": {
+      "total_v": 3,
+      "avoid_v": 0,
+      "total_fix": 1,
+      "avoid_fix": 0
+    }
+  },
+  "latencies": {
+    "p50": 1.679799985140562,
+    "p90": 11.424939997959884,
+    "p99": 20.218189967563386
+  },
+  "similarities": {
+    "variant_mean": 0.16624888888888886,
+    "fix_mean": 0.38001166666666664,
+    "unrelated_mean": 0.0
+  },
+  "readme_scenarios": [
+    {
+      "id": "cwe-89-sqli-py-01",
+      "language": "python",
+      "cwe_or_tag": "CWE-89",
+      "description": "SQL injection via string interpolation in user lookup",
+      "variants": [
+        {
+          "label": "rename",
+          "status": "neutral",
+          "valence": 0.9632,
+          "similarity": 0.0,
+          "confidence": 0.0368,
+          "latency_ms": 17.758000059984624
+        },
+        {
+          "label": "reorder",
+          "status": "neutral",
+          "valence": 0.9375,
+          "similarity": 0.5573,
+          "confidence": 0.0625,
+          "latency_ms": 1.7640000442042947
+        },
+        {
+          "label": "restructure",
+          "status": "neutral",
+          "valence": 0.9529,
+          "similarity": 0.3973,
+          "confidence": 0.0471,
+          "latency_ms": 1.5909000067040324
+        }
+      ],
+      "fix": {
+        "status": "neutral",
+        "valence": 0.9779,
+        "similarity": 0.619,
+        "confidence": 0.0221,
+        "latency_ms": 1.4142999425530434
+      },
+      "unrelated": [
+        {
+          "status": "neutral",
+          "valence": 0.9713,
+          "similarity": 0.0,
+          "confidence": 0.0287,
+          "latency_ms": 1.7807000549510121
+        },
+        {
+          "status": "neutral",
+          "valence": 0.9743,
+          "similarity": 0.0,
+          "confidence": 0.0257,
+          "latency_ms": 1.9784000469371676
+        }
+      ]
+    },
+    {
+      "id": "cwe-775-fd-leak-py-02",
+      "language": "python",
+      "cwe_or_tag": "CWE-775",
+      "description": "Unclosed resource descriptor in loop",
+      "variants": [
+        {
+          "label": "rename",
+          "status": "neutral",
+          "valence": 0.9713,
+          "similarity": 0.351,
+          "confidence": 0.0287,
+          "latency_ms": 21.65779995266348
+        },
+        {
+          "label": "reorder",
+          "status": "neutral",
+          "valence": 0.9434,
+          "similarity": 0.4676,
+          "confidence": 0.0566,
+          "latency_ms": 1.76470004953444
+        },
+        {
+          "label": "restructure",
+          "status": "neutral",
+          "valence": 0.9713,
+          "similarity": 0.0,
+          "confidence": 0.0287,
+          "latency_ms": 1.5888999914750457
+        }
+      ],
+      "fix": {
+        "status": "neutral",
+        "valence": 0.9801,
+        "similarity": 0.6063,
+        "confidence": 0.0199,
+        "latency_ms": 1.4872999163344502
+      },
+      "unrelated": [
+        {
+          "status": "neutral",
+          "valence": 0.9735,
+          "similarity": 0.0,
+          "confidence": 0.0265,
+          "latency_ms": 1.6549000283703208
+        },
+        {
+          "status": "neutral",
+          "valence": 0.975,
+          "similarity": 0.0,
+          "confidence": 0.025,
+          "latency_ms": 1.6642999835312366
+        }
+      ]
+    },
+    {
+      "id": "cwe-835-spinlock-py-03",
+      "language": "python",
+      "cwe_or_tag": "CWE-835",
+      "description": "Unbounded spinlock polling loop without sleep",
+      "variants": [
+        {
+          "label": "rename",
+          "status": "neutral",
+          "valence": 0.9662,
+          "similarity": 0.0,
+          "confidence": 0.0338,
+          "latency_ms": 17.065900028683245
+        },
+        {
+          "label": "reorder",
+          "status": "neutral",
+          "valence": 0.936,
+          "similarity": 0.5111,
+          "confidence": 0.064,
+          "latency_ms": 2.0345000084489584
+        },
+        {
+          "label": "restructure",
+          "status": "neutral",
+          "valence": 0.9728,
+          "similarity": 0.0,
+          "confidence": 0.0272,
+          "latency_ms": 1.4847000129520893
+        }
+      ],
+      "fix": {
+        "status": "neutral",
+        "valence": 0.9801,
+        "similarity": 0.6063,
+        "confidence": 0.0199,
+        "latency_ms": 1.4045999851077795
+      },
+      "unrelated": [
+        {
+          "status": "neutral",
+          "valence": 0.9735,
+          "similarity": 0.0,
+          "confidence": 0.0265,
+          "latency_ms": 1.5307000139728189
+        },
+        {
+          "status": "neutral",
+          "valence": 0.9801,
+          "similarity": 0.0,
+          "confidence": 0.0199,
+          "latency_ms": 1.7620999133214355
+        }
+      ]
+    }
+  ]
+}
