@@ -10,8 +10,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-87%20passed-brightgreen.svg)](tests/)
-[![Latency](https://img.shields.io/badge/reflex%20latency-%3C0.5ms-success.svg)](#benchmark-and-token-savings)
+[![Tests](https://img.shields.io/badge/tests-92%20passed-brightgreen.svg)](tests/)
+[![Latency](https://img.shields.io/badge/reflex%20latency-p50%202.01ms-success.svg)](#benchmark-and-token-savings)
 
 Bio-inspired associative memory and instant code reflex server for AI coding agents, implementing the Drosophila Mushroom Body circuit and Fly-LSH sparse projection algorithm over the Model Context Protocol (MCP).
 
@@ -22,7 +22,7 @@ Bio-inspired associative memory and instant code reflex server for AI coding age
 * **The Problem**: AI coding agents repeatedly consume thousands of LLM prompt tokens and multi-second roundtrip latency diagnosing recurring bugs, antipatterns, and project constraints.
 * **The Solution**: Calyx brings the Drosophila Mushroom Body (fruit fly brain) circuit to AI agents—using Fly-LSH sparse Kenyon Cell projection ($D=2048, k=102$) and dopaminergic synaptic plasticity to give agents instant, zero-overhead associative memory without internal LLM calls.
 * **The Proof (Benchmark)**:
-  * **Latency**: **0.400 ms** (vs ~1,450 ms LLM API roundtrip — **>3,600x faster**)
+  * **Latency**: **2.013 ms (p50) / 3.711 ms (p99)** real-path end-to-end (**0.217 ms (p50)** in-memory vs ~1,450 ms LLM API roundtrip — **>700x faster**)
   * **Token Cost**: **0 tokens** (100% local Mushroom Body execution; zero LLM inference calls)
 
 ---
@@ -33,7 +33,7 @@ In insect neuroanatomy, the **Calyx** (plural: *calyces*) is the primary input n
 
 It is inside the calyx that dense, low-dimensional sensory signals undergo high-dimensional sparse expansion, turning raw input into a distinct neural fingerprint that dopaminergic circuits can reinforce or suppress.
 
-The name **Calyx** was chosen because this MCP server functions as that exact input and associative expansion layer for AI coding agents: converting raw code AST tokens into high-dimensional, ultra-sparse Kenyon Cell representations that drive instantaneous (<0.5 ms) reflexes, pattern recognition, and persistent synaptic memory without LLM inference costs.
+The name **Calyx** was chosen because this MCP server functions as that exact input and associative expansion layer for AI coding agents: converting raw code AST tokens into high-dimensional, ultra-sparse Kenyon Cell representations that drive fast reflexes (p50: 2.013 ms / p99: 3.711 ms real-path; p50: 0.217 ms in-memory), pattern recognition, and persistent synaptic memory without LLM inference costs.
 
 ---
 
@@ -41,7 +41,7 @@ The name **Calyx** was chosen because this MCP server functions as that exact in
 
 Traditional AI coding workflows incur substantial token overhead and multi-second latency by repeatedly sending multi-thousand-token prompt context to Large Language Models (LLMs) to detect recurring bugs, antipatterns, or architectural guidelines.
 
-Calyx provides local, zero-token associative memory modeled after the *Drosophila melanogaster* (fruit fly) Mushroom Body circuit. Code snippets and AST structures are expanded into high-dimensional, ultra-sparse Kenyon Cell representations ($D=2048, k=102$). Synaptic plasticity between Kenyon Cells and Mushroom Body Output Neurons (MBONs) is modulated by reward and punishment signals (dopamine), delivering sub-millisecond pattern recognition without LLM inference costs.
+Calyx provides local, zero-token associative memory modeled after the *Drosophila melanogaster* (fruit fly) Mushroom Body circuit. Code snippets and AST structures are expanded into high-dimensional, ultra-sparse Kenyon Cell representations ($D=2048, k=102$). Synaptic plasticity between Kenyon Cells and Mushroom Body Output Neurons (MBONs) is modulated by reward and punishment signals (dopamine), delivering fast pattern recognition (p50: 0.217 ms in-memory, 2.013 ms real-path) without LLM inference costs.
 
 ---
 
@@ -67,7 +67,7 @@ Calyx provides local, zero-token associative memory modeled after the *Drosophil
 |  +-----------------------------------------------------------------+  |
 |       |                                                               |
 |       v                                                               |
-|  Reflex Output: Neutral / Attraction / Aversion (< 0.5 ms, 0 Tokens)  |
+|  Reflex Output: Neutral / Safe / Avoid (p50: 2.01ms, 0 Tokens)         |
 +-----------------------------------------------------------------------+
 ```
 
@@ -96,25 +96,25 @@ The performance metrics below were measured on a Windows x86_64 host running Pyt
 ============================================================================
 
 [Step 1] Initial Code Reflex Check (Zero Prior Training):
-  * Latency:            0.729 ms
+  * Latency:            2.013 ms (p50 real-path) / 0.217 ms (in-memory)
   * Reflex Status:      NEUTRAL
   * Valence:            1.000
   * Recommendation:     Novel or unverified code pattern. Proceed normally.
   * LLM Tokens Used:    0 tokens (Zero API overhead)
 
 [Step 2] Dopamine Reinforcement (Negative Dopamine Delivery):
-  * Plasticity Latency: 4.040 ms
+  * Plasticity Latency: 2.450 ms
   * Status:             recorded
   * Valence Type:       punishment (Dopaminergic depression signal)
   * Active Synapses:    102 Kenyon Cells updated
   * Persistent State:   Saved to ~/.calyx/mushroom_body_weights.npz
 
-[Step 3] Fast Bio-Reflex on Novel Code Variant:
-  * Latency:            0.400 ms
+[Step 3] Fast Bio-Reflex on Reintroduced Bug Pattern:
+  * Latency:            2.013 ms (p50 real-path) / 0.217 ms (in-memory)
   * Reflex Status:      AVOID (AVERSION TRIGGERED)
   * Valence Score:      0.775 (Aversive)
-  * Bug Similarity:     100.0%
-  * Warning:            High resemblance (100%) to a previously punished bug pattern.
+  * Bug Similarity:     70.0% (Jaccard: 0.700 >= 0.65 threshold)
+  * Warning:            High resemblance (70%) to a previously punished bug pattern.
   * Recommendation:     Review code logic, check edge cases, or adopt alternative.
 
 ============================================================================
@@ -126,7 +126,7 @@ Traditional LLM Querying Loop:
   * Debugging Loop:     ~2400 tokens per repeated bug
 
 Calyx Mushroom Body Reflex:
-  * Latency per review: 0.400 ms (~3,628x speedup)
+  * Latency per review: 2.013 ms p50 real-path / 0.217 ms in-memory (>700x real-path speedup)
   * Token Cost:         0 tokens (Local Fly-LSH sparse projection)
   * Token Efficiency:   100% local execution (Zero LLM inference overhead)
 
@@ -307,22 +307,22 @@ To ensure AI coding agents consistently leverage Calyx before applying code chan
 
 ## Running Tests
 
-Execute the 87-test suite:
+Execute the 92-test suite:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Test Suite Results (87 / 87 Passing)
+### Test Suite Results (92 / 92 Passing)
 
 | Test Suite | Scope & Invariants Tested | Test Count | Status |
 | :--- | :--- | :---: | :---: |
 | **`tests/unit/test_contradiction_resolution.py`** | Failure Override Rule (recent failure overrides positive history), recency tie-breaking, state transitions | 3 | **PASSED** |
 | **`tests/unit/test_edge_cases_and_resilience.py`** | Empty/whitespace rejection, 150KB code blocks, polyglot resilience (Rust, TypeScript, Go, SQL, JSON), unicode | 4 | **PASSED** |
 | **`tests/unit/test_memory_lifecycle_and_bounds.py`** | 500-record ring buffer bounds, corrupt file baseline recovery, passive synaptic weight decay | 3 | **PASSED** |
-| **`tests/unit/test_hasher.py`** | Fly-LSH $D=2048, k=102$ top-k sparsity, deterministic random projection, AST token extraction | 4 | **PASSED** |
+| **`tests/unit/test_hasher.py`** | Fly-LSH $D=2048, k=102$ top-k sparsity, deterministic random projection, AST token extraction | 5 | **PASSED** |
 | **`tests/unit/test_memory.py`** | Dopaminergic PAM reward / PPL1 punishment updates, synaptic weight bounds $[0.0, 5.0]$ | 2 | **PASSED** |
-| **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 1 | **PASSED** |
+| **`tests/unit/test_reflex.py`** | MBON decision thresholds across `avoid`, `safe`, and `neutral` | 4 | **PASSED** |
 | **`tests/unit/test_installer.py`** | Multi-OS paths, safe JSON merging, aliases, backup creation, Zed context_servers, interpreter resolution | 10 | **PASSED** |
 | **`tests/unit/test_installer_regressions.py`** | JSONC string preservation, malformed-input rejection, JSONC discovery, native Cursor paths | 4 | **PASSED** |
 | **`tests/test_security_hardening.py`** | Deserialization guards (`allow_pickle=False`), NaN/Inf recovery, payload length bounds, `.orig.bak` preservation, JSONC comments | 6 | **PASSED** |
@@ -332,13 +332,13 @@ python -m pytest tests/ -v
 | **`tests/e2e/test_tool_annotations.py`** | MCP protocol annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) | 2 | **PASSED** |
 | **`tests/e2e/test_mcp_stdio.py`** | End-to-end MCP JSON-RPC 2.0 stdio initialization, tool listing, and tool dispatch | 1 | **PASSED** |
 | **`tests/e2e/test_cli_installer.py`** | CLI subcommands: `calyx-mcp --help`, `calyx-mcp install --status`, and `calyx-mcp init` | 3 | **PASSED** |
-| **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across instances | 1 | **PASSED** |
+| **`tests/integration/test_persistence.py`** | Atomic synaptic weight save/reload and persistent reflex evaluation across instances | 2 | **PASSED** |
 | **`tests/integration/test_shared_storage.py`** | Custom filenames, exact weight shape, stale and concurrent process writes, reader refresh and reset | 5 | **PASSED** |
 | **`tests/e2e/test_release_followups.py`** | Hidden-failure recall across insertion orders, disk write error propagation, and stdio subprocess restart | 5 | **PASSED** |
 | **`tests/benchmarks/test_token_economics.py`** | Schema token budget (<800 tokens), reflex response footprint (<80 tokens), and mathematical ROI modeling | 3 | **PASSED** |
 | **`tests/unit/test_history_reuse_benchmark.py`** | Synthetic corpus integrity and repair validation, including hardcoded-value rejection | 4 | **PASSED** |
 | **`tests/unit/test_history_usage.py`** | Negative savings, cache accounting, invalid telemetry and ineligible pairs | 3 | **PASSED** |
-| **Total** | **87 passing test cases** | **87** | **100% PASS** |
+| **Total** | **92 passing test cases** | **92** | **100% PASS** |
 
 > [!NOTE]
 > **Persistence & Error Handling**: Synaptic weights and associative records persist locally in `~/.calyx/`. File writes use atomic replacements (`.tmp` to target). In the event of an I/O or filesystem error during disk persistence, an `OSError` is raised and propagated to the MCP caller with actionable diagnostics rather than falsely acknowledging successful recording.
