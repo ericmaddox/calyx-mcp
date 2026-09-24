@@ -58,9 +58,9 @@
     }
   },
   "latencies": {
-    "p50": 1.679799985140562,
-    "p90": 11.424939997959884,
-    "p99": 20.218189967563386
+    "p50": 1.990000018849969,
+    "p90": 12.72544009843842,
+    "p99": 20.622327012242764
   },
   "similarities": {
     "variant_mean": 0.16624888888888886,
@@ -80,7 +80,7 @@
           "valence": 0.9632,
           "similarity": 0.0,
           "confidence": 0.0368,
-          "latency_ms": 17.758000059984624
+          "latency_ms": 25.129899964667857
         },
         {
           "label": "reorder",
@@ -88,7 +88,7 @@
           "valence": 0.9375,
           "similarity": 0.5573,
           "confidence": 0.0625,
-          "latency_ms": 1.7640000442042947
+          "latency_ms": 2.058700076304376
         },
         {
           "label": "restructure",
@@ -96,7 +96,7 @@
           "valence": 0.9529,
           "similarity": 0.3973,
           "confidence": 0.0471,
-          "latency_ms": 1.5909000067040324
+          "latency_ms": 1.828300068154931
         }
       ],
       "fix": {
@@ -104,7 +104,7 @@
         "valence": 0.9779,
         "similarity": 0.619,
         "confidence": 0.0221,
-        "latency_ms": 1.4142999425530434
+        "latency_ms": 3.0500999419018626
       },
       "unrelated": [
         {
@@ -112,14 +112,14 @@
           "valence": 0.9713,
           "similarity": 0.0,
           "confidence": 0.0287,
-          "latency_ms": 1.7807000549510121
+          "latency_ms": 2.864500042051077
         },
         {
           "status": "neutral",
           "valence": 0.9743,
           "similarity": 0.0,
           "confidence": 0.0257,
-          "latency_ms": 1.9784000469371676
+          "latency_ms": 2.1981000900268555
         }
       ]
     },
@@ -135,7 +135,7 @@
           "valence": 0.9713,
           "similarity": 0.351,
           "confidence": 0.0287,
-          "latency_ms": 21.65779995266348
+          "latency_ms": 20.390799967572093
         },
         {
           "label": "reorder",
@@ -143,7 +143,7 @@
           "valence": 0.9434,
           "similarity": 0.4676,
           "confidence": 0.0566,
-          "latency_ms": 1.76470004953444
+          "latency_ms": 2.4787000147625804
         },
         {
           "label": "restructure",
@@ -151,7 +151,7 @@
           "valence": 0.9713,
           "similarity": 0.0,
           "confidence": 0.0287,
-          "latency_ms": 1.5888999914750457
+          "latency_ms": 1.8529000226408243
         }
       ],
       "fix": {
@@ -159,7 +159,7 @@
         "valence": 0.9801,
         "similarity": 0.6063,
         "confidence": 0.0199,
-        "latency_ms": 1.4872999163344502
+        "latency_ms": 1.6866999212652445
       },
       "unrelated": [
         {
@@ -167,14 +167,14 @@
           "valence": 0.9735,
           "similarity": 0.0,
           "confidence": 0.0265,
-          "latency_ms": 1.6549000283703208
+          "latency_ms": 1.9902000203728676
         },
         {
           "status": "neutral",
           "valence": 0.975,
           "similarity": 0.0,
           "confidence": 0.025,
-          "latency_ms": 1.6642999835312366
+          "latency_ms": 1.679199980571866
         }
       ]
     },
@@ -190,7 +190,7 @@
           "valence": 0.9662,
           "similarity": 0.0,
           "confidence": 0.0338,
-          "latency_ms": 17.065900028683245
+          "latency_ms": 12.688900111243129
         },
         {
           "label": "reorder",
@@ -198,7 +198,7 @@
           "valence": 0.936,
           "similarity": 0.5111,
           "confidence": 0.064,
-          "latency_ms": 2.0345000084489584
+          "latency_ms": 2.732700086198747
         },
         {
           "label": "restructure",
@@ -206,7 +206,7 @@
           "valence": 0.9728,
           "similarity": 0.0,
           "confidence": 0.0272,
-          "latency_ms": 1.4847000129520893
+          "latency_ms": 2.387399901635945
         }
       ],
       "fix": {
@@ -214,7 +214,7 @@
         "valence": 0.9801,
         "similarity": 0.6063,
         "confidence": 0.0199,
-        "latency_ms": 1.4045999851077795
+        "latency_ms": 1.7847000854089856
       },
       "unrelated": [
         {
@@ -222,14 +222,14 @@
           "valence": 0.9735,
           "similarity": 0.0,
           "confidence": 0.0265,
-          "latency_ms": 1.5307000139728189
+          "latency_ms": 2.497800043784082
         },
         {
           "status": "neutral",
           "valence": 0.9801,
           "similarity": 0.0,
           "confidence": 0.0199,
-          "latency_ms": 1.7620999133214355
+          "latency_ms": 1.9712999928742647
         }
       ]
     }

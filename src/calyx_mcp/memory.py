@@ -11,6 +11,7 @@ from contextlib import contextmanager
 import numpy as np
 from pathlib import Path
 from typing import Dict, Any, Iterator, List, Optional, Tuple
+from dataclasses import asdict
 import shutil
 from datetime import datetime, timezone
 
@@ -112,10 +113,8 @@ class MushroomBodyMemory:
                 try:
                     with open(self.hasher_config_path, "r", encoding="utf-8") as hf:
                         saved_hcfg = json.load(hf)
-                    if (saved_hcfg.get("dense_dim") != self.hasher_cfg.dense_dim or
-                        saved_hcfg.get("kenyon_cells") != self.hasher_cfg.kenyon_cells or
-                        saved_hcfg.get("active_k") != self.hasher_cfg.active_k or
-                        saved_hcfg.get("seed") != self.hasher_cfg.seed):
+                    current_hcfg = asdict(self.hasher_cfg)
+                    if saved_hcfg != current_hcfg:
                         logger.warning(
                             "Hasher configuration mismatch with persisted state; "
                             "existing weights are invalidated. Resetting with backup."
@@ -197,12 +196,7 @@ class MushroomBodyMemory:
             # 3. Atomic hasher config save (.tmp_<pid>_<seq> -> replace)
             tmp_hcfg = self.storage_dir / f".tmp_{unique_tag}_hasher_config.json"
             with open(tmp_hcfg, "w", encoding="utf-8") as f:
-                json.dump({
-                    "dense_dim": self.hasher_cfg.dense_dim,
-                    "kenyon_cells": self.hasher_cfg.kenyon_cells,
-                    "active_k": self.hasher_cfg.active_k,
-                    "seed": self.hasher_cfg.seed,
-                }, f, indent=2)
+                json.dump(asdict(self.hasher_cfg), f, indent=2)
             self._ensure_secure_file(tmp_hcfg)
             tmp_hcfg.replace(self.hasher_config_path)
             self._ensure_secure_file(self.hasher_config_path)

@@ -146,8 +146,8 @@ Calyx Mushroom Body Reflex:
 
 | Metric | Traditional LLM Inspection | Calyx Mushroom Body | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Latency (In-Memory)** | ~1,450 ms | **0.217 ms (p50)** | **> 6,600x faster** |
-| **Latency (Real-Path End-to-End)** | ~1,450 ms | **2.013 ms (p50)** | **> 700x faster** (Includes cross-process lock & disk snapshot sync) |
+| **Latency (In-Memory)** | ~1,450 ms | **0.217 ms (p50) / 0.533 ms (p99)** | **> 6,600x faster** |
+| **Latency (Real-Path End-to-End)** | ~1,450 ms | **2.013 ms (p50) / 3.711 ms (p99)** | **> 700x faster** (Includes cross-process lock & disk snapshot sync) |
 | **Throughput** | 0.5 - 2 req/s | **452 req/s (real-path) / 4,189 req/s (in-memory)** | Zero external network calls |
 | **Token Consumption** | 650 - 2,400 tokens per loop | **0 tokens** (Local Fly-LSH) | **100% local execution** |
 | **Memory Footprint** | External API | **< 15 MB RAM** | Local execution |
@@ -158,19 +158,16 @@ Calyx Mushroom Body Reflex:
 
 ---
 
-### Empirical Generalization & Near-Duplicate Verification
+### Empirical Generalization & Measured Reflex Verification
 
-Calyx operates as a **deterministic, zero-token associative code memory**. It guarantees that exact bug patterns and near-duplicate regressions caught in previous runs are instantly avoided, while achieving **0.00% false positives** on unrelated code.
-
-In a pre-registered benchmark across 60 multi-language bug-fix pairs (180 paraphrased variants, 60 fixes, and 120 negative controls in Python, JS, Go, Rust, and SQL):
+Calyx operates as a **deterministic, zero-token associative code memory**. In a pre-registered benchmark across 60 multi-language bug-fix pairs (180 paraphrased variants, 60 fixes, and 120 negative controls in Python, JS, Go, Rust, and SQL), Calyx produced the following measured results:
 
 | Evaluation Dimension | Metric Measured | Result | Details |
 | :--- | :--- | :---: | :--- |
 | **Unrelated Negative Controls** | False-Positive Rate | **0.00% (0/120)** | Zero false alarms on safe, unrelated code |
 | **Fixed Code Contradiction Guard** | False-Positive Rate | **5.00% (3/60)** | Contradiction guard protects fixes from false `avoid` flags |
-| **Exact & Near-Duplicate Recall** | Reintroduction Avoid Rate | **100.0%** | Full prevention of exact / minor-edit bug reintroductions |
-| **Paraphrased Variant Generalization** | Standard Hasher Avoid Rate | **4.44% (8/180)** | Renamed/restructured code alters local token n-grams |
-| **Paraphrased Variant Generalization** | Abstracted Tokenizer Avoid Rate | **34.44% (62/180)** | 8x recall improvement via role-placeholder tokenization |
+| **Paraphrased Variant Generalization** | Full-Path Avoid Rate | **4.44% (8/180)** | Measured end-to-end; reordered statements achieve 13.3%, renamed/restructured tokens collapse similarity below 0.65 threshold |
+| **Abstracted Tokenizer Experiment** | Offline Proxy Metric | **34.44% (62/180)** | Raw pairwise hash Jaccard >= 0.65; offline proxy bypassing multi-turn train/valence dynamics |
 
 *See [`benchmarks/2026-09-eval/`](benchmarks/2026-09-eval/) for complete JSONL test records, pre-registered targets, methodology, and reproduction scripts (`scripts/eval_generalization.py`).*
 
@@ -182,7 +179,7 @@ In a pre-registered benchmark across 60 multi-language bug-fix pairs (180 paraph
 Calyx registers the following tools conforming to the MCP JSON-RPC 2.0 specification (2024-11-05):
 
 ### 1. `check_code_reflex`
-Evaluates a code snippet against synaptic valence weights and stored experiences in <0.5ms with 0 LLM prompt tokens.
+Evaluates a code snippet against synaptic valence weights and stored experiences (p50: 2.013ms / p99: 3.711ms real-path; p50: 0.217ms in-memory) with 0 LLM prompt tokens.
 - **Annotations**: `readOnlyHint: true`, `openWorldHint: false`
 - **Parameters**:
   - `code` (string, required): The proposed code snippet, function, or diff to evaluate (aliases: `code_snippet`, `query_code`, `query`).

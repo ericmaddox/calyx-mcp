@@ -13,7 +13,7 @@ class CalyxToolRegistry:
         self._tools = {
             "check_code_reflex": {
                 "name": "check_code_reflex",
-                "description": "Instant (<1ms) associative memory check of proposed code against past rewarded or punished bug patterns. Returns 'avoid', 'safe', or 'neutral'. Calyx is loss-averse by design: a single failure triggers 'avoid' (one-shot aversive conditioning), while 'safe' requires multiple confirmed successes (>= 2 rewards).",
+                "description": "Fast associative memory check of proposed code against past rewarded or punished bug patterns (p50: 2.01ms / p99: 3.71ms real-path; p50: 0.22ms in-memory). Returns 'avoid', 'safe', or 'neutral'. Calyx is loss-averse by design: a single failure triggers 'avoid' (one-shot aversive conditioning), while 'safe' requires multiple confirmed successes (>= 2 rewards).",
                 "annotations": {
                     "readOnlyHint": True,
                     "openWorldHint": False

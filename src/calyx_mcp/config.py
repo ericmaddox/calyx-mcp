@@ -17,7 +17,7 @@ class HasherConfig:
     active_k: int = 102  # ~5% sparsity
     seed: int = 42
     ngram_min: int = 2
-    ngram_max: int = 4
+    ngram_max: int = 2
 
 
 @dataclass

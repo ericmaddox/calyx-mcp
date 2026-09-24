@@ -138,15 +138,19 @@ def main():
                 if sim_u >= 0.65:
                     unrelated_avoid += 1
 
-        print(f"=== Results for {name} ===")
-        print(f"Variant Avoid (Recall):    {variant_avoid}/{total_variants} ({variant_avoid/total_variants*100:.2f}%)")
-        print(f"Fix Avoid (FPR):           {fix_avoid}/{total_fixes} ({fix_avoid/total_fixes*100:.2f}%)")
-        print(f"Unrelated Avoid (FPR):     {unrelated_avoid}/{total_unrelated} ({unrelated_avoid/total_unrelated*100:.2f}%)")
-        print(f"Mean Variant Sim:          {np.mean(sim_variants):.3f}")
-        print(f"Mean Fix Sim:              {np.mean(sim_fixes):.3f}")
-        print(f"Mean Unrelated Sim:        {np.mean(sim_unrelated):.3f}")
+        print(f"=== Results for {name} (Offline Proxy Metric) ===")
+        print(f"  [NOTE: Evaluates raw hash pairwise Jaccard >= 0.65; bypasses train/valence dynamics]")
+        print(f"Variant Avoid Proxy (Recall):  {variant_avoid}/{total_variants} ({variant_avoid/total_variants*100:.2f}%)")
+        print(f"Fix Avoid Proxy (FPR):         {fix_avoid}/{total_fixes} ({fix_avoid/total_fixes*100:.2f}%)")
+        print(f"Unrelated Avoid Proxy (FPR):   {unrelated_avoid}/{total_unrelated} ({unrelated_avoid/total_unrelated*100:.2f}%)")
+        print(f"Mean Variant Sim:              {np.mean(sim_variants):.3f}")
+        print(f"Mean Fix Sim:                  {np.mean(sim_fixes):.3f}")
+        print(f"Mean Unrelated Sim:            {np.mean(sim_unrelated):.3f}")
         print()
 
+    print("=" * 80)
+    print("PHASE 5(a) TOKENIZER EXPERIMENT (OFFLINE PROXY EVALUATION)")
+    print("=" * 80)
     eval_with_hasher(standard_hasher, "Standard Hasher (Baseline)")
     eval_with_hasher(abstract_hasher, "Abstracted Identifiers Hasher")
 
